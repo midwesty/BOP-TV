@@ -329,6 +329,17 @@ main{max-width:var(--maxw);margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px
 .gnow{position:absolute;top:34px;bottom:0;width:2px;background:var(--amber);z-index:2;
   box-shadow:0 0 8px rgba(255,178,62,.7);pointer-events:none}
 .gnow::before{content:"";position:absolute;top:-1px;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--amber)}
+
+/* ---- audio detail hero ---- */
+.audio-hero{display:flex;gap:20px;align-items:center;border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;margin-bottom:18px;flex-wrap:wrap}
+.audio-art{width:150px;height:150px;border-radius:12px;object-fit:cover;flex:0 0 auto;
+  box-shadow:0 12px 30px -12px rgba(0,0,0,.7)}
+.audio-body{flex:1;min-width:230px}
+.audio-title{font-family:"Bricolage Grotesque";font-weight:800;font-size:clamp(22px,4vw,30px);line-height:1.05}
+.audio-meta{color:#C7C7D2;font-size:15px;margin-top:6px}
+.audio-body audio{width:100%;margin-top:12px}
+.audio-disc{color:var(--ink-faint);font-size:13px;margin:12px 0 0}
 </style>
 </head>
 <body>
@@ -382,9 +393,10 @@ const DATA = {
     tz:"America/Chicago"
   },
   channels:[
-    {id:"one",      name:"BOP TV One", number:"01", color:"#FFB23E", tagline:"The main mix — shorts, features, and idents all night."},
-    {id:"vault",    name:"The Vault",  number:"02", color:"#37D6C4", tagline:"Dug up from the archive. Reruns and rarities."},
-    {id:"graveyard",name:"Graveyard",  number:"03", color:"#FF4D8D", tagline:"Late-night weird cinema for the wide awake."}
+    {id:"one",      name:"BOP TV One", number:"01", color:"#FFB23E", template:"linear", tagline:"The main mix — shorts, features, and idents all night."},
+    {id:"vault",    name:"The Vault",  number:"02", color:"#37D6C4", template:"linear", tagline:"Dug up from the archive. Reruns and rarities."},
+    {id:"graveyard",name:"Graveyard",  number:"03", color:"#FF4D8D", template:"linear", tagline:"Late-night weird cinema for the wide awake."},
+    {id:"bopfm",    name:"BOP FM",     number:"04", color:"#B98CFF", template:"music",  tagline:"Nonstop music from the Better Off Published family — just the song, a visualizer, and who made it."}
   ],
   creators:[
     {id:"bop",     name:"Better Off Published", kind:"Studio", color:"#FFB23E", bio:"The scrappy independent studio behind BOP TV — music, comedy, and film made by and for the local creative scene."},
@@ -393,7 +405,8 @@ const DATA = {
     {id:"romero",  name:"George A. Romero",     kind:"Filmmaker", color:"#FF4D8D", bio:"Director of the 1968 landmark that invented the modern zombie film — and, thanks to a distributor's missing copyright notice, one of cinema's most-shared public-domain works."},
     {id:"chaplin", name:"Charlie Chaplin",      kind:"Filmmaker", color:"#F4F1E8", bio:"The Tramp himself. His earliest silent shorts and features are public domain and remain some of the funniest films ever cut."},
     {id:"keaton",  name:"Buster Keaton",        kind:"Filmmaker", color:"#7BD655", bio:"The Great Stone Face — silent comedy's fearless engineer of the impossible gag."},
-    {id:"lang",    name:"Fritz Lang",           kind:"Filmmaker", color:"#FFB23E", bio:"Master of shadow and dread, from German Expressionism to hard American film noir."}
+    {id:"lang",    name:"Fritz Lang",           kind:"Filmmaker", color:"#FFB23E", bio:"Master of shadow and dread, from German Expressionism to hard American film noir."},
+    {id:"soundhelix", name:"SoundHelix",         kind:"Placeholder audio", color:"#B98CFF", bio:"Royalty-free algorithmic music used here as placeholder audio for BOP FM, credited per SoundHelix's terms. These stand in for Better Off Published's own catalogue, which will live on Bunny with signed URLs."}
   ],
   series:[
     {id:"s-open", name:"The Open Movie Collection", creatorId:"blender", blurb:"A run of landmark open-source short films, presented as a BOP TV cinema strand."}
@@ -406,6 +419,7 @@ const DATA = {
     {id:"matinee", name:"The Matinee", seriesId:null, creatorId:"pdt", blurb:"Daytime comedies, musicals, and family pictures."},
     {id:"cartoon-cavalcade", name:"Cartoon Cavalcade", seriesId:null, creatorId:"pdt", blurb:"Classic public-domain animation between the features."},
     {id:"two-reelers", name:"Two-Reelers", seriesId:null, creatorId:"pdt", blurb:"Short comedy from the masters — Chaplin, Keaton, the Stooges, the Keystone gang."},
+    {id:"bop-fm", name:"BOP FM", seriesId:null, creatorId:"soundhelix", blurb:"BOP TV's nonstop music channel — the song, an animated visualizer, and who made it. A discovery stream that points listeners to where they can buy and stream."},
     {id:"ad-break",    name:"The Ad Break", seriesId:null, creatorId:"bop", blurb:"Fake commercials, promos, and channel messages. The good part of TV, honestly."},
     {id:"station",     name:"Station Idents", seriesId:null, creatorId:"bop", blurb:"The little BOP TV bumpers that play between programming. Generated live in your browser — logo, color bars, and a jingle."}
   ],
@@ -444,6 +458,16 @@ const DATA = {
     {id:"stooges",  title:"Three Stooges: Disorder in the Court",showId:"two-reelers", creatorId:"pdt", channelId:"one", category:"Shorts", dur:1020, url:ARC+"Disorder_in_the_Court.mp4",           hue:120, desc:"1936. The boys take the witness stand. Peak public-domain Stooges anarchy."},
     {id:"popeye",   title:"Popeye Meets Aladdin",            showId:"cartoon-cavalcade", creatorId:"pdt", channelId:"one", category:"Cartoons", dur:1020, url:ARC+"Popeye_Meets_Aladdin.mp4",        hue:40,  desc:"1939. A two-reel Technicolor special — spinach meets the magic lamp."},
     {id:"betty",    title:"Betty Boop: My Friend the Monkey",showId:"cartoon-cavalcade", creatorId:"pdt", channelId:"one", category:"Cartoons", dur:420,  url:ARC+"Betty_Boop_My_Friend_the_Monkey.mp4",hue:300, desc:"1939. Betty adopts a mischievous monkey and the house pays for it. Fleischer cartoon fun."},
+    /* ---- BOP FM audio tracks (audio-only; our visualizer draws the picture). Real BOP releases go on Bunny Storage w/ signed URLs. ---- */
+    {id:"sh1", title:"SoundHelix Song 1", artist:"SoundHelix", album:"Algorithmic Sessions, Vol. 1", year:2019, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:373, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", hue:265, desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
+    {id:"sh2", title:"SoundHelix Song 2", artist:"SoundHelix", album:"Algorithmic Sessions, Vol. 1", year:2019, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:426, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", hue:210, desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
+    {id:"sh3", title:"SoundHelix Song 3", artist:"SoundHelix", album:"Algorithmic Sessions, Vol. 1", year:2020, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:350, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", hue:330, desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
+    {id:"sh4", title:"SoundHelix Song 4", artist:"SoundHelix", album:"Algorithmic Sessions, Vol. 2", year:2020, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:392, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", hue:150, desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
+    {id:"sh5", title:"SoundHelix Song 5", artist:"SoundHelix", album:"Algorithmic Sessions, Vol. 2", year:2021, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:301, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", hue:40,  desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
+    {id:"sh6", title:"SoundHelix Song 6", artist:"SoundHelix", album:"Algorithmic Sessions, Vol. 2", year:2021, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:432, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", hue:90,  desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
+    {id:"sh7", title:"SoundHelix Song 7", artist:"SoundHelix", album:"Night Signals", year:2022, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:410, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", hue:285, desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
+    {id:"sh8", title:"SoundHelix Song 8", artist:"SoundHelix", album:"Night Signals", year:2022, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:380, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", hue:180, desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
+    {id:"sh9", title:"SoundHelix Song 9", artist:"SoundHelix", album:"Night Signals", year:2023, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:365, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", hue:5,   desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
     /* generated idents — no URL; rendered on canvas with synthesized audio */
     {id:"id-power",title:"BOP TV — Sign On",   showId:"station", creatorId:"bop", channelId:"one",       category:"Idents", dur:9,  ident:"power", hue:40,  desc:"A CRT power-on station identification."},
     {id:"id-bars", title:"BOP TV — Color Bars",showId:"station", creatorId:"bop", channelId:"one",       category:"Idents", dur:8,  ident:"bars",  hue:52,  desc:"The classic broadcast test pattern and tone, BOP TV style."},
@@ -454,7 +478,8 @@ const DATA = {
   playlists:{
     one:      ["id-power","fbf","deuces","id-star","betty","brb","gulliver","id-bars","stooges","fbb","brunette","bbb","id-star","popeye","brb","africa","id-power","janitor","fbf","shedone","id-bars","mabel","reefer"],
     vault:    ["id-bars","detour","id-star","oneweek","brb","nosferatu","fbj","hewalked","id-power","steamboat","brb","doa","id-star","scarlet","id-bars","ed"],
-    graveyard:["id-power","notld","brb","fbe","carnival","id-bars","teens","id-star","bucket","brb","santa","fbm","sintel","id-power","tos"]
+    graveyard:["id-power","notld","brb","fbe","carnival","id-bars","teens","id-star","bucket","brb","santa","fbm","sintel","id-power","tos"],
+    bopfm:    ["id-bars","sh1","sh2","sh3","sh4","sh5","sh6","sh7","sh8","sh9"]
   }
 };
 
@@ -468,7 +493,8 @@ const creatorById = {}; DATA.creators.forEach(c=>creatorById[c.id]=c);
 /* release years (for On Demand sort by date) */
 const YEARS = {notld:1968,carnival:1962,bucket:1959,teens:1959,santa:1964,detour:1945,doa:1949,scarlet:1945,
   hewalked:1948,nosferatu:1922,steamboat:1928,reefer:1936,africa:1949,brunette:1947,gulliver:1939,deuces:1939,
-  shedone:1933,oneweek:1920,janitor:1914,mabel:1914,stooges:1936,popeye:1939,betty:1939,bbb:2008,sintel:2010,ed:2006,tos:2012};
+  shedone:1933,oneweek:1920,janitor:1914,mabel:1914,stooges:1936,popeye:1939,betty:1939,bbb:2008,sintel:2010,ed:2006,tos:2012,
+  sh1:2019,sh2:2019,sh3:2020,sh4:2020,sh5:2021,sh6:2021,sh7:2022,sh8:2022,sh9:2023};
 const addedOrder = {}; DATA.content.forEach((c,i)=>addedOrder[c.id]=i); // array order ≈ recency
 
 /* ---------- 2. GENERATED ART (logos + posters) ---------- */
@@ -495,8 +521,12 @@ function poster(item){
   const c = chanById[item.channelId] || {color:"#FFB23E"};
   const h = item.hue!=null?item.hue:40;
   const t = esc(item.title);
-  const isIdent = !!item.ident;
-  const barY = isIdent? "" : `<g opacity=".9"><rect x="0" y="0" width="10" height="100%" fill="hsl(${h} 70% 60%)"/></g>`;
+  const isIdent = !!item.ident, isAudio = !!item.audio;
+  const barY = (isIdent||isAudio)? "" : `<g opacity=".9"><rect x="0" y="0" width="10" height="100%" fill="hsl(${h} 70% 60%)"/></g>`;
+  const vinyl = isAudio? `<g transform="translate(250,58)">
+      <circle r="40" fill="#0b0b10" stroke="hsl(${h} 62% 58%)" stroke-width="1.5"/>
+      <circle r="30" fill="none" stroke="rgba(255,255,255,.09)"/><circle r="21" fill="none" stroke="rgba(255,255,255,.09)"/>
+      <circle r="12" fill="hsl(${h} 58% 48%)"/><circle r="3.5" fill="#0b0b10"/></g>`:"";
   return `data:image/svg+xml;utf8,`+encodeURIComponent(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180">
      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
@@ -507,7 +537,7 @@ function poster(item){
      ${isIdent?`<g><rect x="118" y="58" width="84" height="64" rx="10" fill="#0b0b10" stroke="rgba(255,255,255,.15)"/>
         <rect x="128" y="68" width="8" height="44" fill="#F4F1E8"/><rect x="138" y="68" width="8" height="44" fill="#FFB23E"/>
         <rect x="148" y="68" width="8" height="44" fill="#37D6C4"/><rect x="158" y="68" width="8" height="44" fill="#7BD655"/>
-        <rect x="168" y="68" width="8" height="44" fill="#FF4D8D"/><rect x="178" y="68" width="8" height="44" fill="#5B8CFF"/></g>`:barY}
+        <rect x="168" y="68" width="8" height="44" fill="#FF4D8D"/><rect x="178" y="68" width="8" height="44" fill="#5B8CFF"/></g>`:vinyl+barY}
      <text x="20" y="150" font-family="Bricolage Grotesque,Arial,sans-serif" font-weight="800" font-size="22" fill="#F4F1E8">${t}</text>
      <circle cx="298" cy="22" r="6" fill="${c.color}"/>
    </svg>`);
@@ -665,6 +695,59 @@ function drawProgram(canvas,item,t0){
   identRAF=requestAnimationFrame(frame);
 }
 
+/* animated music visualizer — radial spectrum + vinyl + bottom equalizer + metadata lower-third */
+function drawMusic(canvas,item,t0){
+  cancelAnimationFrame(identRAF);
+  const ctx=canvas.getContext("2d");
+  const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const hue=item.hue!=null?item.hue:270, ch=chanById[item.channelId]||{color:"#B98CFF"};
+  function frame(now){
+    const W=canvas.width=canvas.clientWidth*devicePixelRatio, H=canvas.height=canvas.clientHeight*devicePixelRatio;
+    const el=(now-t0)/1000, u=Math.min(W,H);
+    const g=ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,`hsl(${hue} 55% 14%)`); g.addColorStop(1,`hsl(${(hue+50)%360} 50% 6%)`);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    // radial spectrum + vinyl
+    const cx=W*0.5, cy=H*0.40, R=u*0.15, bars=48;
+    ctx.save(); ctx.translate(cx,cy);
+    for(let i=0;i<bars;i++){
+      const a=(i/bars)*Math.PI*2 - Math.PI/2 + (reduce?0:el*0.2);
+      const amp=reduce?0.4:(0.45+0.55*Math.abs(Math.sin(el*3+i*0.6)*Math.cos(el*1.7+i*0.3)));
+      const len=amp*u*0.10;
+      ctx.strokeStyle=`hsl(${(hue+i*4)%360} 78% ${55+amp*10}%)`;
+      ctx.lineWidth=Math.max(1.5,u*0.006); ctx.lineCap="round";
+      ctx.beginPath(); ctx.moveTo(Math.cos(a)*R,Math.sin(a)*R);
+      ctx.lineTo(Math.cos(a)*(R+len),Math.sin(a)*(R+len)); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(0,0,R*0.62,0,7); ctx.fillStyle="#0b0b10"; ctx.fill();
+    ctx.beginPath(); ctx.arc(0,0,R*0.6,0,7); ctx.strokeStyle=`hsla(${hue} 70% 70% / .5)`; ctx.lineWidth=2; ctx.stroke();
+    ctx.beginPath(); ctx.arc(0,0,u*0.012,0,7); ctx.fillStyle=ch.color; ctx.fill();
+    ctx.restore();
+    // bottom equalizer
+    const n=32, bw=(W*0.82)/n, bx=W*0.09, by=H*0.88;
+    for(let i=0;i<n;i++){
+      const ph=reduce?0.35:(0.5+0.5*Math.sin(el*4+i*0.5)*Math.sin(el*1.2+i*0.8));
+      const bh=Math.max(u*0.006,Math.abs(ph)*u*0.10);
+      ctx.fillStyle=`hsl(${(hue+i*6)%360} 70% 60%)`; ctx.globalAlpha=0.82;
+      ctx.fillRect(bx+i*bw,by-bh,bw*0.6,bh); ctx.globalAlpha=1;
+    }
+    // metadata lower-third
+    ctx.textAlign="left"; ctx.textBaseline="alphabetic";
+    ctx.fillStyle=ch.color; ctx.font=`600 ${u*0.03}px 'Instrument Sans',system-ui,sans-serif`;
+    ctx.fillText("♪ NOW PLAYING · BOP FM", W*0.09, H*0.585);
+    let fs=u*0.085; ctx.font=`800 ${fs}px 'Bricolage Grotesque',system-ui,sans-serif`;
+    const title=item.title;
+    while(ctx.measureText(title).width>W*0.82 && fs>u*0.04){fs-=1;ctx.font=`800 ${fs}px 'Bricolage Grotesque',system-ui,sans-serif`;}
+    ctx.fillStyle="#F4F1E8"; ctx.fillText(title, W*0.09, H*0.675);
+    ctx.fillStyle="#C7C7D2"; ctx.font=`500 ${u*0.034}px 'Instrument Sans',system-ui,sans-serif`;
+    ctx.fillText([item.artist,item.album,item.year].filter(Boolean).join("   ·   "), W*0.09, H*0.725);
+    ctx.fillStyle="rgba(244,241,232,.45)"; ctx.font=`500 ${u*0.024}px 'Instrument Sans',system-ui,sans-serif`;
+    ctx.fillText("BOP TV · audio simulated in preview", W*0.09, H*0.95);
+    if(!reduce) identRAF=requestAnimationFrame(frame);
+  }
+  identRAF=requestAnimationFrame(frame);
+}
+
 /* ---------- 6. ROUTER ---------- */
 function go(route){ if(location.hash!=="#"+route) location.hash=route; else render(); }
 window.addEventListener("hashchange",render);
@@ -811,6 +894,25 @@ function tickLive(force){
       drawIdent(cv,air.item.ident,performance.now()-air.offset*1000);
       if(air.offset<1.4) jingle(air.item.ident); // only if caught near the top
       announce("Now on air: "+air.item.title);
+    } else if(air.item.audio){
+      // music channel — audio plays through the (hidden) media element; canvas draws the visualizer
+      cancelAnimationFrame(identRAF);
+      v.style.display="none"; cv.style.display="block"; showSlate(false);
+      v.muted=masterMuted; v.src=air.item.url;
+      drawMusic(cv,air.item,performance.now()-air.offset*1000);
+      const seekA=()=>{
+        try{v.currentTime=Math.min(air.offset,(v.duration||air.item.dur)-0.3)}catch(e){}
+        const p=v.play();
+        if(p&&p.catch)p.catch(()=>{
+          if(!v.muted){v.muted=true;masterMuted=true;const mb=document.getElementById("muteBtn");
+            if(mb){mb.innerHTML=icon("mute");mb.setAttribute("aria-label","Turn sound on")}
+            announce("Muted — press sound on to hear BOP FM");}
+          v.play().catch(()=>{});
+        });
+        v.removeEventListener("loadedmetadata",seekA);
+      };
+      v.addEventListener("loadedmetadata",seekA);
+      announce("Now playing: "+air.item.title+(air.item.artist?" by "+air.item.artist:""));
     } else {
       cancelAnimationFrame(identRAF);
       v.muted=masterMuted; v.style.display="block"; cv.style.display="none";
@@ -848,18 +950,20 @@ function paintNow(){
   const ups=upcoming(liveState.chId,Date.now(),4);
   const chy=document.getElementById("chyron");
   if(chy){
+    const aud=it.audio;
+    const meta = aud
+      ? `${it.artist?`<span>${esc(it.artist)}</span>`:""}${it.album?`<span>${esc(it.album)}</span>`:""}${it.year?`<span>${it.year}</span>`:""}<span>${fmtDur(it.dur)}</span>`
+      : `<span>${esc(show?show.name:"")}</span><span>${esc(it.category)}</span><span>${fmtDur(it.dur)}</span>`;
     chy.innerHTML=`
-      <div class="kick"><span class="live-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--live)"></span> Now on air · ends ${fmtClock(air.endMs)}</div>
+      <div class="kick"><span class="live-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--live)"></span> ${aud?"♪ Now playing":"Now on air"} · ends ${fmtClock(air.endMs)}</div>
       <h2>${esc(it.title)}</h2>
-      <div class="meta">
-        <span>${esc(show?show.name:"")}</span><span>${esc(it.category)}</span><span>${fmtDur(it.dur)}</span>
-      </div>
+      <div class="meta">${meta}</div>
       <p class="desc">${esc(it.desc)}</p>
       <div class="links">
-        ${show?`<button class="chip" data-nav="/show/${show.id}">Series: ${esc(show.name)}</button>`:""}
+        ${show?`<button class="chip" data-nav="/show/${show.id}">${aud?"Channel: ":"Series: "}${esc(show.name)}</button>`:""}
         ${cr?`<button class="chip" data-nav="/creator/${cr.id}">By ${esc(cr.name)}</button>`:""}
         <button class="chip" data-nav="/channel/${ch.id}"><span class="sw" style="background:${ch.color}"></span>${esc(ch.name)}</button>
-        ${!it.ident?`<button class="chip" data-nav="/watch/${it.id}">▶ Watch from the start</button>`:""}
+        ${aud?`<button class="chip" data-nav="/watch/${it.id}">♪ Where to listen</button>`:(!it.ident?`<button class="chip" data-nav="/watch/${it.id}">▶ Watch from the start</button>`:"")}
       </div>`;
   }
   const strip=document.getElementById("strip");
@@ -889,15 +993,23 @@ function renderGuide(){
   let hours="";
   for(let h=0;h<24;h++){ hours+=`<span class="ghour" style="left:${h*60*PXMIN}px">${((h%12)||12)}${h<12?'a':'p'}</span>`; }
   const rows=DATA.channels.map(ch=>{
-    const cells=dayAbsSchedule(ch.id,dayStart).map(s=>{
-      const w=Math.max(2,((s.endMs-s.startMs)/60000)*PXMIN);
-      const live=isToday && s.startMs<=now && now<s.endMs;
-      const show=showById[s.item.showId], wide=w>44;
-      const tgt = live ? "live:"+ch.id : (s.item.ident ? "" : "watch:"+s.item.id);
-      return `<button class="gcell2 ${live?'glive':''}" style="width:${w}px" data-go="${tgt}" ${tgt?'':'tabindex="-1" aria-hidden="true"'}>
-        ${wide?`<span class="gt">${live?'<b class="gliveflag">● LIVE</b> ':''}${esc(s.item.title)}</span><span class="gs">${fmtClock(s.startMs)} · ${esc(show?show.name:s.item.category)}</span>`:''}
-      </button>`;
-    }).join("");
+    let cells;
+    if(ch.template==="music"){
+      const live=isToday;
+      cells = live
+        ? `<button class="gcell2 glive" style="width:${trackW}px" data-go="live:${ch.id}"><span class="gt"><b class="gliveflag">● LIVE</b> ${esc(ch.name)} · Nonstop music</span><span class="gs">${esc(ch.tagline)}</span></button>`
+        : `<div class="gcell2" style="width:${trackW}px"><span class="gt">${esc(ch.name)} · Nonstop music</span><span class="gs">${esc(ch.tagline)}</span></div>`;
+    } else {
+      cells=dayAbsSchedule(ch.id,dayStart).map(s=>{
+        const w=Math.max(2,((s.endMs-s.startMs)/60000)*PXMIN);
+        const live=isToday && s.startMs<=now && now<s.endMs;
+        const show=showById[s.item.showId], wide=w>44;
+        const tgt = live ? "live:"+ch.id : (s.item.ident ? "" : "watch:"+s.item.id);
+        return `<button class="gcell2 ${live?'glive':''}" style="width:${w}px" data-go="${tgt}" ${tgt?'':'tabindex="-1" aria-hidden="true"'}>
+          ${wide?`<span class="gt">${live?'<b class="gliveflag">● LIVE</b> ':''}${esc(s.item.title)}</span><span class="gs">${fmtClock(s.startMs)} · ${esc(show?show.name:s.item.category)}</span>`:''}
+        </button>`;
+      }).join("");
+    }
     return `<div class="grow2">
       <div class="gchan"><span class="gcn"><span class="dot" style="background:${ch.color}"></span>${esc(ch.name)}</span><span class="gcnum">CH ${ch.number}</span></div>
       <div class="gcells" style="width:${trackW}px">${cells}</div>
@@ -1002,10 +1114,11 @@ function renderSearch(){
 }
 function tileHTML(it){
   const show=showById[it.showId];
-  return `<button class="tile" data-id="${it.id}" aria-label="Watch ${esc(it.title)}">
+  const sub = it.audio&&it.artist ? it.artist : (show?show.name:it.category);
+  return `<button class="tile" data-id="${it.id}" aria-label="${it.audio?'Play':'Watch'} ${esc(it.title)}">
     <div class="poster"><img src="${poster(it)}" alt="" loading="lazy"></div>
     <div class="ttl">${esc(it.title)}</div>
-    <div class="sub">${esc(show?show.name:it.category)} · ${fmtDur(it.dur)}</div>
+    <div class="sub">${esc(sub)} · ${fmtDur(it.dur)}</div>
   </button>`;
 }
 
@@ -1015,17 +1128,31 @@ function renderWatch(id){
   if(!it||it.ident){V.innerHTML=notFound();return}
   const show=showById[it.showId], series=show?seriesById[show.seriesId]:null, cr=creatorById[it.creatorId], ch=chanById[it.channelId];
   const more=DATA.content.filter(c=>!c.ident && c.showId===it.showId && c.id!==it.id);
+  const hero = it.audio
+    ? `<div class="audio-hero" style="background:linear-gradient(135deg,hsl(${it.hue!=null?it.hue:270} 45% 18%),hsl(${((it.hue!=null?it.hue:270)+40)%360} 45% 9%))">
+         <img class="audio-art" src="${poster(it)}" alt="">
+         <div class="audio-body">
+           <p class="eyebrow" style="margin:0 0 4px">${esc((chanById[it.channelId]||{}).name||"BOP FM")}</p>
+           <div class="audio-title">${esc(it.title)}</div>
+           <div class="audio-meta">${[it.artist,it.album,it.year].filter(Boolean).map(esc).join(" · ")}</div>
+           <audio controls preload="none" src="${it.url}" style="width:100%;margin-top:12px"></audio>
+           <p class="audio-disc">Discovery stream — the real release will link out to buy &amp; stream.</p>
+         </div>
+       </div>`
+    : `<div class="watch-hero"><video controls playsinline preload="metadata" poster="${poster(it)}" src="${it.url}" aria-label="${esc(it.title)}"></video></div>`;
   V.innerHTML=`
     <button class="back-btn" onclick="history.back()">${icon("back")} Back</button>
-    <div class="watch-hero"><video controls playsinline preload="metadata" poster="${poster(it)}" src="${it.url}" aria-label="${esc(it.title)}"></video></div>
+    ${hero}
     <div class="detail-head"><h1>${esc(it.title)}</h1></div>
-    <div class="detail-meta"><span>${esc(it.category)}</span><span>${fmtDur(it.dur)}</span>${show?`<span>${esc(show.name)}</span>`:""}</div>
+    <div class="detail-meta">${it.audio
+        ? `${it.artist?`<span>${esc(it.artist)}</span>`:""}${it.album?`<span>${esc(it.album)}</span>`:""}${it.year?`<span>${it.year}</span>`:""}<span>${fmtDur(it.dur)}</span>`
+        : `<span>${esc(it.category)}</span><span>${fmtDur(it.dur)}</span>${show?`<span>${esc(show.name)}</span>`:""}`}</div>
     <p class="detail-desc">${esc(it.desc)}</p>
     <div class="detail-links">
-      ${show?`<button class="chip" data-nav="/show/${show.id}">Series: ${esc(show.name)}</button>`:""}
+      ${show?`<button class="chip" data-nav="/show/${show.id}">${it.audio?"Channel: ":"Series: "}${esc(show.name)}</button>`:""}
       ${series?`<button class="chip" data-nav="/series/${series.id}">Collection: ${esc(series.name)}</button>`:""}
       ${cr?`<button class="chip" data-nav="/creator/${cr.id}">By ${esc(cr.name)}</button>`:""}
-      <button class="chip" data-nav="/channel/${ch.id}"><span class="sw" style="background:${ch.color}"></span>Airs on ${esc(ch.name)}</button>
+      <button class="chip" data-nav="/channel/${ch.id}"><span class="sw" style="background:${ch.color}"></span>${it.audio?"On ":"Airs on "}${esc(ch.name)}</button>
     </div>
     ${more.length?`<section class="rail"><h2 class="rail-h">More from ${esc(show.name)}</h2>
       <div class="rail-track">${more.map(tileHTML).join("")}</div></section>`:""}`;
