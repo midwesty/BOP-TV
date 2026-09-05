@@ -265,6 +265,70 @@ main{max-width:var(--maxw);margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px
 @media (min-width:920px){
   .now-panel{grid-template-columns:1.5fr 1fr;align-items:start}
 }
+
+/* ---- search entry (header + on demand) ---- */
+.navsearch{padding:9px 12px;display:inline-grid;place-items:center}
+.navsearch svg{display:block}
+.searchbar{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink-dim);
+  border-radius:12px;padding:12px 15px;font-size:15px;margin-bottom:18px}
+.searchbar:hover{border-color:var(--line-strong)}
+.searchbar svg{flex:0 0 auto;color:var(--ink-faint)}
+.searchfield{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line-strong);
+  border-radius:12px;padding:0 14px;margin-bottom:22px}
+.searchfield:focus-within{border-color:var(--amber)}
+.searchfield svg{flex:0 0 auto;color:var(--ink-faint)}
+.searchfield input{flex:1;background:none;border:0;outline:none;color:var(--ink);font-size:16px;
+  font-family:inherit;padding:14px 0}
+.searchfield input::placeholder{color:var(--ink-faint)}
+
+/* ---- show-all + browse grid + sort ---- */
+.rail-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.rail-head .rail-h{margin:0}
+.railall{appearance:none;background:none;border:0;cursor:pointer;color:var(--amber);font-size:13.5px;
+  font-weight:600;white-space:nowrap;padding:4px 2px}
+.railall:hover{color:#ffbe5a}
+.browse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px 14px}
+.browse-grid .tile{flex:none;width:auto}
+.sortbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.sortlab{color:var(--ink-faint);font-size:13px;font-weight:600;margin-right:2px}
+.sortbtn{appearance:none;cursor:pointer;background:var(--surface);border:1px solid var(--line);color:var(--ink-dim);
+  border-radius:999px;padding:7px 14px;font-size:13.5px;font-weight:500}
+.sortbtn[aria-pressed="true"]{background:var(--amber);color:#1a1206;border-color:var(--amber);font-weight:600}
+
+/* ---- guide v2 (day tabs + 24h px timeline) ---- */
+.gtabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.gtabs::-webkit-scrollbar{display:none}
+.gtab{flex:0 0 auto;appearance:none;cursor:pointer;background:var(--surface);border:1px solid var(--line);
+  color:var(--ink-dim);border-radius:999px;padding:8px 15px;font-size:14px;font-weight:600;white-space:nowrap}
+.gtab[aria-pressed="true"]{background:var(--amber);color:#1a1206;border-color:var(--amber)}
+.guide2{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.gscroll{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.ginner{position:relative}
+.gruler{display:flex;position:sticky;top:0;z-index:4;background:var(--surface-2);border-bottom:1px solid var(--line);height:34px}
+.gcorner{position:sticky;left:0;z-index:5;flex:0 0 128px;background:var(--surface-2);border-right:1px solid var(--line);
+  display:flex;align-items:center;padding:0 12px;font-size:11px;color:var(--ink-faint);font-weight:600}
+.ghours{position:relative;flex:0 0 auto;height:34px}
+.ghour{position:absolute;top:9px;font-family:"DM Mono",monospace;font-size:11px;color:var(--ink-dim);
+  padding-left:6px;border-left:1px solid var(--line);height:16px;line-height:16px}
+.grow2{display:flex;border-bottom:1px solid var(--line)}
+.grow2:last-child{border-bottom:0}
+.gchan{position:sticky;left:0;z-index:3;flex:0 0 128px;background:var(--surface);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 12px;min-height:66px}
+.gcn{font-family:"Bricolage Grotesque";font-weight:700;font-size:14px;display:flex;align-items:center;gap:7px}
+.gcn .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+.gcnum{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--ink-faint)}
+.gcells{position:relative;flex:0 0 auto;white-space:nowrap;font-size:0}
+.gcell2{display:inline-block;vertical-align:top;height:66px;overflow:hidden;border-left:1px solid var(--line);
+  background:none;cursor:pointer;text-align:left;padding:9px 8px;color:inherit}
+.gcell2:hover{background:var(--surface-2)}
+.gcell2.glive{background:rgba(255,178,62,.10)}
+.gcell2 .gt{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcell2 .gs{display:block;font-size:11px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
+.gliveflag{color:var(--live);font-weight:700}
+.gnow{position:absolute;top:34px;bottom:0;width:2px;background:var(--amber);z-index:2;
+  box-shadow:0 0 8px rgba(255,178,62,.7);pointer-events:none}
+.gnow::before{content:"";position:absolute;top:-1px;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--amber)}
 </style>
 </head>
 <body>
@@ -277,6 +341,7 @@ main{max-width:var(--maxw);margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px
     <button class="navlink" data-route="/guide">Guide</button>
     <button class="navlink" data-route="/ondemand">On Demand</button>
     <button class="navlink" data-route="/about">About</button>
+    <button class="navlink navsearch" data-route="/search" aria-label="Search"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
   </nav>
   <div class="clock" aria-hidden="true">
     <span class="live-dot"></span>
@@ -400,6 +465,11 @@ const chanById = {}; DATA.channels.forEach(c=>chanById[c.id]=c);
 const showById = {}; DATA.shows.forEach(s=>showById[s.id]=s);
 const seriesById = {}; DATA.series.forEach(s=>seriesById[s.id]=s);
 const creatorById = {}; DATA.creators.forEach(c=>creatorById[c.id]=c);
+/* release years (for On Demand sort by date) */
+const YEARS = {notld:1968,carnival:1962,bucket:1959,teens:1959,santa:1964,detour:1945,doa:1949,scarlet:1945,
+  hewalked:1948,nosferatu:1922,steamboat:1928,reefer:1936,africa:1949,brunette:1947,gulliver:1939,deuces:1939,
+  shedone:1933,oneweek:1920,janitor:1914,mabel:1914,stooges:1936,popeye:1939,betty:1939,bbb:2008,sintel:2010,ed:2006,tos:2012};
+const addedOrder = {}; DATA.content.forEach((c,i)=>addedOrder[c.id]=i); // array order ≈ recency
 
 /* ---------- 2. GENERATED ART (logos + posters) ---------- */
 function brandLogo(h){ // h = height px
@@ -421,6 +491,7 @@ function brandLogo(h){ // h = height px
 }
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function poster(item){
+  if(item.thumb) return item.thumb;   // real thumbnail (e.g. from Bunny) when available
   const c = chanById[item.channelId] || {color:"#FFB23E"};
   const h = item.hue!=null?item.hue:40;
   const t = esc(item.title);
@@ -444,38 +515,40 @@ function poster(item){
 function fmtDur(s){const m=Math.floor(s/60),ss=Math.round(s%60);return m+":"+String(ss).padStart(2,"0")}
 function fmtClock(ms){const d=new Date(ms);let h=d.getHours(),m=d.getMinutes();const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap}
 
-/* ---------- 3. THE ENGINE (simulated linear playhead) ---------- */
-function loopLen(chId){return DATA.playlists[chId].reduce((s,id)=>s+byId[id].dur,0)}
-function airingAt(chId, nowMs){
-  const pl = DATA.playlists[chId], L = loopLen(chId);
-  let t = Math.floor(nowMs/1000) % L, acc=0;
-  for(let i=0;i<pl.length;i++){
-    const item = byId[pl[i]];
-    if(t < acc+item.dur){
-      return {i, item, offset:t-acc, startMs:nowMs-(t-acc)*1000, endMs:nowMs+(item.dur-(t-acc))*1000, L};
-    }
-    acc+=item.dur;
+/* ---------- 3. THE ENGINE (24-hour daily schedule, anchored to local midnight) ---------- */
+const DAY = 86400; // seconds in a day
+function localMidnight(ms){ const d=new Date(ms); d.setHours(0,0,0,0); return d.getTime(); }
+const _daySched={};
+function dailySchedule(chId){          // tiles [0,DAY): the playlist repeated to fill a full 24h
+  if(_daySched[chId]) return _daySched[chId];
+  const pl=DATA.playlists[chId], out=[]; let t=0,i=0,guard=0;
+  while(t<DAY && guard<100000){
+    const it=byId[pl[i%pl.length]];
+    let end=t+it.dur; if(end>DAY) end=DAY;        // trim final segment to midnight
+    out.push({id:it.id,start:t,end:end}); t=end; i++; guard++;
   }
-  return {i:0, item:byId[pl[0]], offset:0, startMs:nowMs, endMs:nowMs+byId[pl[0]].dur*1000, L};
+  _daySched[chId]=out; return out;
+}
+function airingAt(chId, nowMs){
+  const dayStart=localMidnight(nowMs), sched=dailySchedule(chId), sec=(nowMs-dayStart)/1000;
+  for(let k=0;k<sched.length;k++){ const s=sched[k];
+    if(sec>=s.start && sec<s.end)
+      return {i:k, item:byId[s.id], offset:sec-s.start, startMs:dayStart+s.start*1000, endMs:dayStart+s.end*1000};
+  }
+  const s=sched[0];
+  return {i:0, item:byId[s.id], offset:0, startMs:dayStart, endMs:dayStart+s.end*1000};
 }
 function upcoming(chId, nowMs, count){
-  const pl=DATA.playlists[chId], cur=airingAt(chId,nowMs), out=[]; let clock=cur.endMs;
-  for(let n=1;n<=count;n++){
-    const idx=(cur.i+n)%pl.length, item=byId[pl[idx]];
-    out.push({item, startMs:clock}); clock+=item.dur*1000;
+  const sched=dailySchedule(chId), cur=airingAt(chId,nowMs), out=[];
+  let dayStart=localMidnight(nowMs), k=cur.i;
+  for(let n=0;n<count;n++){
+    k++; if(k>=sched.length){k=0; dayStart+=DAY*1000;}
+    const s=sched[k]; out.push({item:byId[s.id], startMs:dayStart+s.start*1000});
   }
   return out;
 }
-/* project a channel's schedule across a time window for the guide */
-function project(chId, fromMs, windowSec){
-  const pl=DATA.playlists[chId], cur=airingAt(chId,fromMs), out=[]; 
-  let clock=cur.startMs, idx=cur.i; const end=fromMs+windowSec*1000; let guard=0;
-  while(clock<end && guard<80){
-    const item=byId[pl[idx]];
-    out.push({item, startMs:clock, endMs:clock+item.dur*1000});
-    clock+=item.dur*1000; idx=(idx+1)%pl.length; guard++;
-  }
-  return out;
+function dayAbsSchedule(chId, dayStartMs){  // one day's segments as absolute ms (for the guide)
+  return dailySchedule(chId).map(s=>({item:byId[s.id], startMs:dayStartMs+s.start*1000, endMs:dayStartMs+s.end*1000}));
 }
 
 /* ---------- 4. AUDIO (synthesized idents) ---------- */
@@ -612,9 +685,10 @@ const announcer=document.getElementById("announcer");
 function announce(msg){announcer.textContent="";setTimeout(()=>announcer.textContent=msg,60)}
 
 function setNav(route){
+  const seg=route.split("/")[1]||"live", map={browse:"ondemand"};
+  const active="/"+(map[seg]||seg);
   document.querySelectorAll(".navlink").forEach(b=>{
-    const on=("/"+ (route.split("/")[1]||"live"))===b.dataset.route;
-    if(on)b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
+    if(b.dataset.route===active)b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
   });
 }
 function focusMain(){const m=document.getElementById("main");if(m)m.focus()}
@@ -632,6 +706,8 @@ function render(){
   else if(parts[0]==="channel"){renderChannelPage(parts[1])}
   else if(parts[0]==="guide"){renderGuide()}
   else if(parts[0]==="ondemand"){renderOnDemand()}
+  else if(parts[0]==="browse"){renderBrowse(decodeURIComponent(parts[1]||"All"))}
+  else if(parts[0]==="search"){renderSearch()}
   else if(parts[0]==="about"){renderAbout()}
   else {renderLive()}
   focusMain();
@@ -799,63 +875,130 @@ function paintNow(){
 }
 
 /* ---- GUIDE ---- */
+let guideDay=0;
+const PXMIN=4, GLABELW=128, GUIDE_DAYS=7;
 function renderGuide(){
-  const now=Date.now(), windowSec=3*3600, slots=6, slotSec=windowSec/slots;
-  const timeLabels=[];for(let i=0;i<slots;i++){timeLabels.push(fmtClock(now+i*slotSec*1000))}
+  const now=Date.now(), baseMid=localMidnight(now);
+  const dayStart=baseMid + guideDay*DAY*1000, isToday=guideDay===0, trackW=1440*PXMIN;
+  const tabs=[];
+  for(let d=0;d<GUIDE_DAYS;d++){
+    const dt=new Date(baseMid+d*DAY*1000);
+    const lab = d===0?"Today":d===1?"Tomorrow":dt.toLocaleDateString(undefined,{weekday:'short',day:'numeric'});
+    tabs.push(`<button class="gtab" role="tab" data-gday="${d}" aria-pressed="${d===guideDay}">${lab}</button>`);
+  }
+  let hours="";
+  for(let h=0;h<24;h++){ hours+=`<span class="ghour" style="left:${h*60*PXMIN}px">${((h%12)||12)}${h<12?'a':'p'}</span>`; }
   const rows=DATA.channels.map(ch=>{
-    const segs=project(ch.id,now,windowSec);
-    const cells=segs.map((s,idx)=>{
-      const startRef=idx===0?now:s.startMs;
-      const w=((s.endMs-startRef)/(windowSec*1000))*100;
-      const isLive=idx===0;
-      const show=showById[s.item.showId];
-      return `<button class="pcell ${isLive?'live':''}" style="flex:0 0 ${w}%" data-watch="${s.item.ident?'':s.item.id}">
-        <div class="pt">${isLive?'<span class="liveflag">● LIVE  </span>':''}${esc(s.item.title)}</div>
-        <div class="ps">${fmtClock(s.startMs)} · ${esc(show?show.name:s.item.category)}</div>
+    const cells=dayAbsSchedule(ch.id,dayStart).map(s=>{
+      const w=Math.max(2,((s.endMs-s.startMs)/60000)*PXMIN);
+      const live=isToday && s.startMs<=now && now<s.endMs;
+      const show=showById[s.item.showId], wide=w>44;
+      const tgt = live ? "live:"+ch.id : (s.item.ident ? "" : "watch:"+s.item.id);
+      return `<button class="gcell2 ${live?'glive':''}" style="width:${w}px" data-go="${tgt}" ${tgt?'':'tabindex="-1" aria-hidden="true"'}>
+        ${wide?`<span class="gt">${live?'<b class="gliveflag">● LIVE</b> ':''}${esc(s.item.title)}</span><span class="gs">${fmtClock(s.startMs)} · ${esc(show?show.name:s.item.category)}</span>`:''}
       </button>`;
     }).join("");
-    return `<div class="grow">
-      <div class="chan"><span class="cn"><span class="dot" style="background:${ch.color}"></span>${esc(ch.name)}</span><span class="cnum">CH ${ch.number}</span></div>
-      <div class="prog">${cells}</div>
+    return `<div class="grow2">
+      <div class="gchan"><span class="gcn"><span class="dot" style="background:${ch.color}"></span>${esc(ch.name)}</span><span class="gcnum">CH ${ch.number}</span></div>
+      <div class="gcells" style="width:${trackW}px">${cells}</div>
     </div>`;
   }).join("");
+  const nowLeft=GLABELW+((now-baseMid)/60000)*PXMIN;
   V.innerHTML=`
     <p class="eyebrow">What's on</p>
     <h1 class="section-h">Guide</h1>
-    <p class="guide-note">Every channel is live right now — the amber line is this moment. Just like Pluto or a cable box: scroll to see what's coming, tap a program to jump to it on demand.</p>
-    <div class="guide"><div class="guide-scroll"><div class="guide-inner">
-      <div class="timebar"><div class="lab">CHANNEL</div><div class="slots">${timeLabels.map(t=>`<div class="slot">${t}</div>`).join("")}</div></div>
-      <div style="position:relative">${rows}<div class="nowline" style="left:150px"></div></div>
+    <p class="guide-note">A full 24-hour schedule on every channel, ${GUIDE_DAYS} days out. Tap a show that's <b style="color:var(--live)">live now</b> to jump into that channel in progress; tap anything later to open it on demand.</p>
+    <div class="gtabs" role="tablist" aria-label="Guide day">${tabs.join("")}</div>
+    <div class="guide2"><div class="gscroll"><div class="ginner" style="width:${GLABELW+trackW}px">
+      <div class="gruler"><div class="gcorner">CHANNEL</div><div class="ghours" style="width:${trackW}px">${hours}</div></div>
+      ${rows}
+      ${isToday?`<div class="gnow" style="left:${nowLeft}px"></div>`:''}
     </div></div></div>`;
-  V.querySelectorAll(".pcell").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.watch)go("/watch/"+b.dataset.watch)}));
+  V.querySelectorAll(".gtab").forEach(b=>b.addEventListener("click",()=>{guideDay=+b.dataset.gday;renderGuide();}));
+  V.querySelectorAll(".gcell2[data-go]").forEach(b=>b.addEventListener("click",()=>{
+    const g=b.dataset.go; if(!g)return;
+    if(g.slice(0,5)==="live:"){ liveState.chId=g.slice(5); go("/live"); }
+    else if(g.slice(0,6)==="watch:"){ go("/watch/"+g.slice(6)); }
+  }));
+  const sc=V.querySelector(".gscroll");
+  if(sc) sc.scrollLeft = isToday ? Math.max(0,((now-baseMid)/60000)*PXMIN-40) : 8*60*PXMIN;
 }
 
 /* ---- ON DEMAND ---- */
 let vodFilter="All";
+function vodItems(){ return DATA.content.filter(c=>!c.ident && c.category!=="Promos"); }
 function renderOnDemand(){
-  const cats=["All",...Array.from(new Set(DATA.content.filter(c=>!c.ident).map(c=>c.category)))];
-  const feature=byId["tos"];
+  const cats=["All",...Array.from(new Set(vodItems().map(c=>c.category)))];
   V.innerHTML=`
     <p class="eyebrow">Watch anytime</p>
     <h1 class="section-h">On Demand</h1>
+    <button class="searchbar" data-nav="/search">${icon("search")}<span>Search titles, people, channels…</span></button>
     <div class="filter-row" role="group" aria-label="Filter by category">
-      ${cats.map(c=>`<button class="fbtn" data-cat="${c}" aria-pressed="${c===vodFilter}">${c}</button>`).join("")}
+      ${cats.map(c=>`<button class="fbtn" data-cat="${esc(c)}" aria-pressed="${c===vodFilter}">${esc(c)}</button>`).join("")}
     </div>
     <div id="rails"></div>`;
   V.querySelectorAll(".fbtn").forEach(b=>b.addEventListener("click",()=>{vodFilter=b.dataset.cat;renderOnDemand()}));
   const rails=document.getElementById("rails");
   const groups={};
-  DATA.content.filter(c=>!c.ident && (vodFilter==="All"||c.category===vodFilter)).forEach(c=>{
-    (groups[c.category]=groups[c.category]||[]).push(c);
-  });
+  vodItems().filter(c=>vodFilter==="All"||c.category===vodFilter).forEach(c=>{(groups[c.category]=groups[c.category]||[]).push(c);});
   rails.innerHTML=Object.keys(groups).map(cat=>`
-    <section class="rail" aria-label="${cat}">
-      <h2 class="rail-h">${cat}</h2>
-      <div class="rail-track">
-        ${groups[cat].map(it=>tileHTML(it)).join("")}
-      </div>
-    </section>`).join("") || `<p style="color:var(--ink-dim)">Nothing in this category yet.</p>`;
+    <section class="rail" aria-label="${esc(cat)}">
+      <div class="rail-head"><h2 class="rail-h">${esc(cat)}</h2>
+        <button class="railall" data-nav="/browse/${encodeURIComponent(cat)}">Show all →</button></div>
+      <div class="rail-track">${groups[cat].map(tileHTML).join("")}</div>
+    </section>`).join("") || `<p style="color:var(--ink-dim)">Nothing here yet.</p>`;
   rails.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
+}
+/* ---- BROWSE (full category grid, sortable) ---- */
+let browseSort="az";
+function sortItems(items,mode){
+  const a=items.slice();
+  if(mode==="az") a.sort((x,y)=>x.title.localeCompare(y.title));
+  else if(mode==="year") a.sort((x,y)=>(YEARS[x.id]||9999)-(YEARS[y.id]||9999));
+  else if(mode==="recent") a.sort((x,y)=>(addedOrder[y.id]||0)-(addedOrder[x.id]||0));
+  return a;
+}
+function renderBrowse(cat){
+  const all=vodItems();
+  const items=cat==="All"?all:all.filter(c=>c.category===cat);
+  const sorted=sortItems(items,browseSort);
+  const sorts=[["az","A–Z"],["year","Release date"],["recent","Recently added"]];
+  V.innerHTML=`
+    <button class="back-btn" data-nav="/ondemand">${icon("back")} On Demand</button>
+    <p class="eyebrow">Browse</p>
+    <h1 class="section-h">${esc(cat)} <span style="color:var(--ink-faint);font-size:16px;font-weight:500">${items.length}</span></h1>
+    <div class="sortbar"><span class="sortlab">Sort</span>
+      ${sorts.map(([k,l])=>`<button class="sortbtn" data-sort="${k}" aria-pressed="${k===browseSort}">${l}</button>`).join("")}
+    </div>
+    <div class="browse-grid">${sorted.map(tileHTML).join("")}</div>`;
+  V.querySelectorAll(".sortbtn").forEach(b=>b.addEventListener("click",()=>{browseSort=b.dataset.sort;renderBrowse(cat);}));
+  V.querySelectorAll(".browse-grid .tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
+}
+/* ---- SEARCH ---- */
+let searchQ="";
+function searchMatch(c,q){
+  q=q.toLowerCase();
+  const show=showById[c.showId], cr=creatorById[c.creatorId], ch=chanById[c.channelId];
+  return [c.title,c.category,show&&show.name,cr&&cr.name,ch&&ch.name].filter(Boolean).some(s=>s.toLowerCase().includes(q));
+}
+function renderSearch(){
+  V.innerHTML=`
+    <button class="back-btn" data-nav="/ondemand">${icon("back")} On Demand</button>
+    <p class="eyebrow">Search</p>
+    <h1 class="section-h">Search</h1>
+    <div class="searchfield">${icon("search")}<input id="searchInput" type="search" autocomplete="off" placeholder="Search titles, people, channels…" aria-label="Search" value="${esc(searchQ)}"></div>
+    <div id="searchResults"></div>`;
+  const inp=document.getElementById("searchInput"), res=document.getElementById("searchResults");
+  function run(){
+    searchQ=inp.value.trim();
+    if(!searchQ){res.innerHTML=`<p style="color:var(--ink-dim)">Start typing to search ${vodItems().length} titles.</p>`;return;}
+    const hits=vodItems().filter(c=>searchMatch(c,searchQ));
+    res.innerHTML=hits.length?`<div class="browse-grid">${hits.map(tileHTML).join("")}</div>`
+      :`<p style="color:var(--ink-dim)">No matches for &ldquo;${esc(searchQ)}&rdquo;.</p>`;
+    res.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
+  }
+  inp.addEventListener("input",run); run();
+  setTimeout(()=>inp.focus(),40);
 }
 function tileHTML(it){
   const show=showById[it.showId];
@@ -971,6 +1114,7 @@ function icon(n){const s='width="20" height="20" viewBox="0 0 24 24" fill="none"
   if(n==="mute")return `<svg ${s}><path d="M11 5 6 9H3v6h3l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>`;
   if(n==="sound")return `<svg ${s}><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
   if(n==="fs")return `<svg ${s}><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"/></svg>`;
+  if(n==="search")return `<svg ${s}><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
   if(n==="back")return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
   return "";
 }
