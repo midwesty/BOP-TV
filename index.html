@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BOP TV — Independent Television</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   BOP TV — v0.001 proof of concept
+   Identity: indie broadcast heritage (color bars, ON AIR amber,
+   chyron lower-thirds, CRT warmth) meets modern streaming clarity.
+   ============================================================ */
+:root{
+  --bg:#0E0E14;            /* screen-lit room */
+  --surface:#17171F;
+  --surface-2:#20212B;
+  --line:rgba(255,255,255,.09);
+  --line-strong:rgba(255,255,255,.16);
+  --ink:#F4F1E8;           /* warm off-white */
+  --ink-dim:#9B9BAA;
+  --ink-faint:#6A6A78;
+  --amber:#FFB23E;         /* brand / ON AIR / focus */
+  --amber-deep:#E8901A;
+  --live:#37D6C4;          /* live / now */
+  --pop:#FF4D8D;           /* used sparingly */
+  --focus:#FFB23E;
+  --radius:14px;
+  --radius-sm:9px;
+  --maxw:1240px;
+  --header-h:60px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Instrument Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+h1,h2,h3,h4{font-family:"Bricolage Grotesque","Instrument Sans",sans-serif;font-weight:800;line-height:1.05;margin:0}
+a{color:inherit}
+button{font-family:inherit}
+img,svg,canvas,video{display:block;max-width:100%}
+.mono{font-family:"DM Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+/* --- accessibility floor --- */
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+:focus:not(:focus-visible){outline:none}
+.skip-link{position:absolute;left:-999px;top:8px;z-index:200;background:var(--amber);color:#1a1206;
+  padding:10px 16px;border-radius:8px;font-weight:600;text-decoration:none}
+.skip-link:focus{left:12px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);border:0}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}
+}
+
+/* ============================ HEADER ============================ */
+.app-header{
+  position:sticky;top:0;z-index:60;height:var(--header-h);
+  display:flex;align-items:center;gap:18px;
+  padding:0 clamp(14px,3vw,26px);
+  background:rgba(14,14,20,.82);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex:0 0 auto;background:none;border:0;cursor:pointer;padding:0}
+.brand svg{height:30px;width:auto}
+.brand .cow{display:none}
+.mainnav{display:flex;gap:4px;margin-left:6px;flex:1 1 auto;overflow-x:auto;scrollbar-width:none}
+.mainnav::-webkit-scrollbar{display:none}
+.navlink{
+  appearance:none;background:none;border:0;cursor:pointer;
+  color:var(--ink-dim);font-size:15px;font-weight:600;
+  padding:9px 14px;border-radius:999px;white-space:nowrap;
+  transition:color .15s,background .15s;
+}
+.navlink:hover{color:var(--ink)}
+.navlink[aria-current="page"]{color:#1a1206;background:var(--amber)}
+.clock{
+  flex:0 0 auto;display:flex;align-items:center;gap:9px;
+  color:var(--ink-dim);font-size:13px;
+}
+.clock .live-dot{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(55,214,196,.6);animation:pulse 2.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(55,214,196,.55)}70%{box-shadow:0 0 0 7px rgba(55,214,196,0)}100%{box-shadow:0 0 0 0 rgba(55,214,196,0)}}
+.clock time{font-family:"DM Mono",monospace;letter-spacing:.02em;color:var(--ink)}
+
+/* ============================ LAYOUT ============================ */
+main{max-width:var(--maxw);margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px,3vw,26px) 60px}
+.view{animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.eyebrow{color:var(--amber);font-weight:600;font-size:13.5px;letter-spacing:.01em;margin:0 0 6px}
+.section-h{font-size:clamp(20px,3vw,26px);margin:0 0 14px;display:flex;align-items:baseline;gap:12px}
+
+/* ============================ LIVE STAGE ============================ */
+.stage-wrap{position:relative;border-radius:var(--radius);overflow:hidden;background:#000;
+  border:1px solid var(--line);box-shadow:0 24px 60px -30px rgba(0,0,0,.9)}
+.stage{position:relative;aspect-ratio:16/9;background:#000}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%}
+/* subtle CRT warmth on stage only */
+.scanlines{position:absolute;inset:0;pointer-events:none;z-index:3;mix-blend-mode:overlay;opacity:.5;
+  background:repeating-linear-gradient(to bottom,rgba(255,255,255,.04) 0 1px,transparent 1px 3px)}
+.vignette{position:absolute;inset:0;pointer-events:none;z-index:3;
+  box-shadow:inset 0 0 120px 20px rgba(0,0,0,.55)}
+@media (prefers-reduced-motion:reduce){.scanlines{display:none}}
+
+/* ON AIR badge */
+.onair{position:absolute;top:12px;left:12px;z-index:6;display:flex;align-items:center;gap:8px;
+  background:rgba(10,10,14,.66);backdrop-filter:blur(6px);border:1px solid var(--line-strong);
+  padding:6px 11px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.06em}
+.onair b{color:var(--amber)}
+.onair .rec{width:9px;height:9px;border-radius:50%;background:var(--amber);animation:pulse-a 1.8s infinite}
+@keyframes pulse-a{0%,100%{opacity:1}50%{opacity:.35}}
+.chan-badge{position:absolute;top:12px;right:12px;z-index:6;display:flex;align-items:center;gap:8px;
+  background:rgba(10,10,14,.66);backdrop-filter:blur(6px);border:1px solid var(--line-strong);
+  padding:6px 11px;border-radius:10px;font-size:12px;font-weight:600}
+.chan-badge .num{font-family:"DM Mono",monospace;color:var(--ink-dim)}
+
+/* Tune-in gate */
+.gate{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;text-align:center;background:radial-gradient(120% 90% at 50% 35%,#181826 0%,#0b0b10 75%);cursor:pointer}
+.gate .bars{width:min(260px,60%);height:auto;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.gate h2{font-size:clamp(22px,4vw,30px)}
+.gate p{color:var(--ink-dim);margin:0;max-width:34ch}
+.tune-btn{display:inline-flex;align-items:center;gap:10px;background:var(--amber);color:#1a1206;
+  border:0;border-radius:999px;padding:14px 26px;font-size:17px;font-weight:700;cursor:pointer;
+  box-shadow:0 10px 30px -8px rgba(255,178,62,.5)}
+.tune-btn:hover{background:#ffbe5a}
+
+/* signal-loss slate */
+.slate{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;text-align:center;background:#0b0b10;color:var(--ink-dim);padding:20px}
+.slate.show{display:flex}
+.slate .bars{width:min(220px,55%);border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.slate strong{color:var(--ink);font-family:"Bricolage Grotesque";font-size:19px}
+
+/* live controls */
+.stage-controls{position:absolute;left:0;right:0;bottom:0;z-index:8;
+  display:flex;align-items:center;gap:8px;padding:14px 14px 12px;
+  background:linear-gradient(to top,rgba(6,6,10,.9),transparent)}
+.ic-btn{appearance:none;background:rgba(20,20,28,.7);border:1px solid var(--line-strong);color:var(--ink);
+  width:42px;height:42px;border-radius:11px;display:inline-grid;place-items:center;cursor:pointer}
+.ic-btn:hover{background:rgba(40,40,52,.8)}
+.ic-btn svg{width:20px;height:20px}
+.live-progress{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden;margin:0 4px}
+.live-progress i{display:block;height:100%;width:0;background:var(--amber);transition:width 1s linear}
+
+/* chyron / lower third + now info */
+.now-panel{display:grid;grid-template-columns:1fr;gap:18px;margin-top:16px}
+.chyron{background:linear-gradient(90deg,var(--surface),var(--surface-2));border:1px solid var(--line);
+  border-left:4px solid var(--amber);border-radius:var(--radius);padding:16px 18px}
+.chyron .kick{color:var(--live);font-weight:600;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.chyron h2{font-size:clamp(21px,3.4vw,28px);margin-bottom:6px}
+.chyron .meta{color:var(--ink-dim);font-size:14.5px;display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:10px}
+.chyron .desc{color:var(--ink-dim);font-size:15px;max-width:70ch}
+.chyron .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{appearance:none;cursor:pointer;background:var(--surface-2);border:1px solid var(--line-strong);
+  color:var(--ink);border-radius:999px;padding:7px 13px;font-size:13.5px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.chip:hover{border-color:var(--amber);color:#fff}
+.chip .sw{width:9px;height:9px;border-radius:2px}
+
+/* up next filmstrip */
+.upnext h3{font-size:15px;color:var(--ink-dim);font-weight:600;margin:0 0 10px}
+.strip{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+.strip::-webkit-scrollbar{height:8px}
+.strip::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:99px}
+.upcard{flex:0 0 190px;scroll-snap-align:start}
+.upcard .time{font-family:"DM Mono",monospace;font-size:12px;color:var(--amber);margin-bottom:6px}
+.upcard .poster{border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--line);aspect-ratio:16/9}
+.upcard .ttl{font-size:13.5px;margin-top:7px;color:var(--ink);font-weight:600;line-height:1.25}
+.upcard .sub{font-size:12px;color:var(--ink-faint)}
+
+/* channel switcher */
+.chan-row{display:flex;gap:10px;margin:6px 0 20px;overflow-x:auto;padding-bottom:4px}
+.chan-pill{flex:0 0 auto;appearance:none;cursor:pointer;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;color:var(--ink);text-align:left}
+.chan-pill:hover{border-color:var(--line-strong)}
+.chan-pill[aria-pressed="true"]{border-color:var(--amber);background:var(--surface-2)}
+.chan-pill .dot{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.chan-pill .cn{font-weight:700;font-family:"Bricolage Grotesque";font-size:14.5px;line-height:1}
+.chan-pill .cnum{font-family:"DM Mono",monospace;font-size:11px;color:var(--ink-faint)}
+
+/* ============================ RAILS (ON DEMAND) ============================ */
+.rail{margin-bottom:30px}
+.rail-h{font-size:18px;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+.rail-track{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.rail-track::-webkit-scrollbar{height:8px}
+.rail-track::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:99px}
+.tile{flex:0 0 clamp(200px,42vw,248px);scroll-snap-align:start;appearance:none;background:none;border:0;
+  cursor:pointer;text-align:left;color:inherit;padding:0}
+.tile .poster{border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--line);aspect-ratio:16/9;
+  transition:border-color .15s,transform .15s}
+.tile:hover .poster,.tile:focus-visible .poster{border-color:var(--amber)}
+.tile .ttl{font-size:15px;font-weight:600;margin-top:9px;line-height:1.25}
+.tile .sub{font-size:13px;color:var(--ink-dim);margin-top:2px}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.fbtn{appearance:none;cursor:pointer;background:var(--surface);border:1px solid var(--line);color:var(--ink-dim);
+  border-radius:999px;padding:8px 15px;font-size:14px;font-weight:500}
+.fbtn[aria-pressed="true"]{background:var(--amber);color:#1a1206;border-color:var(--amber);font-weight:600}
+
+/* ============================ GUIDE ============================ */
+.guide-note{color:var(--ink-dim);font-size:14px;margin:0 0 16px;max-width:70ch}
+.guide{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.guide-scroll{overflow-x:auto}
+.guide-inner{min-width:760px;position:relative}
+.timebar{display:flex;position:sticky;top:0;background:var(--surface-2);border-bottom:1px solid var(--line);z-index:2}
+.timebar .lab{flex:0 0 150px;padding:10px 14px;font-size:12px;color:var(--ink-faint);font-weight:600;border-right:1px solid var(--line)}
+.timebar .slots{display:flex;flex:1}
+.timebar .slot{flex:1;padding:10px 8px;font-family:"DM Mono",monospace;font-size:12px;color:var(--ink-dim);border-left:1px solid var(--line)}
+.grow{display:flex;border-bottom:1px solid var(--line)}
+.grow:last-child{border-bottom:0}
+.grow .chan{flex:0 0 150px;padding:12px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:3px;background:var(--surface)}
+.grow .chan .cn{font-family:"Bricolage Grotesque";font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.grow .chan .cn .dot{width:9px;height:9px;border-radius:3px}
+.grow .chan .cnum{font-family:"DM Mono",monospace;font-size:11px;color:var(--ink-faint)}
+.grow .prog{position:relative;flex:1;display:flex}
+.pcell{border-left:1px solid var(--line);padding:10px 12px;overflow:hidden;cursor:pointer;background:none;appearance:none;color:inherit;text-align:left;min-width:0}
+.pcell:hover{background:var(--surface-2)}
+.pcell.live{background:rgba(255,178,62,.09)}
+.pcell .pt{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcell .ps{font-size:11.5px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcell .liveflag{color:var(--live);font-size:10.5px;font-weight:700;letter-spacing:.08em}
+.nowline{position:absolute;top:0;bottom:0;width:2px;background:var(--amber);z-index:3;pointer-events:none;box-shadow:0 0 8px rgba(255,178,62,.7)}
+.nowline::before{content:"";position:absolute;top:-1px;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--amber)}
+
+/* ============================ DETAIL / WATCH ============================ */
+.back-btn{appearance:none;background:none;border:0;cursor:pointer;color:var(--ink-dim);font-size:14px;
+  display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;font-weight:500}
+.back-btn:hover{color:var(--ink)}
+.watch-hero{border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);background:#000;aspect-ratio:16/9;margin-bottom:18px}
+.watch-hero video{width:100%;height:100%;object-fit:contain;background:#000}
+.detail-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;margin-bottom:8px}
+.detail-head h1{font-size:clamp(24px,4vw,34px)}
+.detail-meta{color:var(--ink-dim);font-size:14.5px;display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:14px}
+.detail-desc{color:var(--ink-dim);font-size:15.5px;max-width:72ch;margin-bottom:16px}
+.detail-links{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:28px}
+.profile-head{display:flex;gap:16px;align-items:center;margin-bottom:8px}
+.profile-avatar{width:64px;height:64px;border-radius:14px;flex:0 0 auto;display:grid;place-items:center;
+  font-family:"Bricolage Grotesque";font-weight:800;font-size:26px;color:#0e0e14}
+
+/* ============================ ABOUT ============================ */
+.about{max-width:64ch}
+.about p{color:var(--ink-dim);font-size:16px;margin:0 0 16px}
+.about .lede{color:var(--ink);font-size:19px;line-height:1.5}
+.about h2{font-size:20px;margin:26px 0 10px}
+.callout{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--live);
+  border-radius:var(--radius);padding:16px 18px;font-size:14.5px;color:var(--ink-dim);margin-top:20px}
+
+/* ============================ FOOTER ============================ */
+.app-footer{border-top:1px solid var(--line);margin-top:40px;padding:26px clamp(14px,3vw,26px);
+  color:var(--ink-faint);font-size:13px;max-width:var(--maxw);margin-left:auto;margin-right:auto;
+  display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+.app-footer .b{color:var(--ink-dim)}
+
+@media (max-width:640px){
+  .timebar .lab,.grow .chan{flex-basis:118px}
+  .now-panel{gap:14px}
+}
+@media (min-width:920px){
+  .now-panel{grid-template-columns:1.5fr 1fr;align-items:start}
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+
+<header class="app-header">
+  <button class="brand" data-nav="/live" aria-label="BOP TV home" id="brandLink"></button>
+  <nav class="mainnav" aria-label="Primary">
+    <button class="navlink" data-route="/live">Live</button>
+    <button class="navlink" data-route="/guide">Guide</button>
+    <button class="navlink" data-route="/ondemand">On Demand</button>
+    <button class="navlink" data-route="/about">About</button>
+  </nav>
+  <div class="clock" aria-hidden="true">
+    <span class="live-dot"></span>
+    <time id="clock">--:--</time>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <div id="view" class="view"></div>
+</main>
+
+<footer class="app-footer">
+  <span class="b" id="footBrand">BOP TV</span>
+  <span>Produced by Better Off Published</span>
+  <span>v0.001 · proof of concept · placeholder programming</span>
+</footer>
+
+<!-- live region for screen readers -->
+<div class="sr-only" aria-live="polite" id="announcer"></div>
+
+<script>
+/* ================================================================
+   BOP TV — application
+   ----------------------------------------------------------------
+   Everything below the DATA block is engine + UI. The DATA block is
+   the part the future "BOP TV Builder" edits — no code changes
+   needed to add a video, a channel, or reschedule the day.
+   ================================================================ */
+
+/* ---------- 1. DATA (the future JSON the Builder will edit) ---------- */
+const SAMPLE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/";
+const ARC = "https://archive.org/download/publicmovies212/"; // Internet Archive public-domain films (direct .mp4)
+const DATA = {
+  config:{
+    appName:"BOP TV",
+    company:"Better Off Published",
+    tagline:"Independent television, on all night.",
+    tz:"America/Chicago"
+  },
+  channels:[
+    {id:"one",      name:"BOP TV One", number:"01", color:"#FFB23E", tagline:"The main mix — shorts, features, and idents all night."},
+    {id:"vault",    name:"The Vault",  number:"02", color:"#37D6C4", tagline:"Dug up from the archive. Reruns and rarities."},
+    {id:"graveyard",name:"Graveyard",  number:"03", color:"#FF4D8D", tagline:"Late-night weird cinema for the wide awake."}
+  ],
+  creators:[
+    {id:"bop",     name:"Better Off Published", kind:"Studio", color:"#FFB23E", bio:"The scrappy independent studio behind BOP TV — music, comedy, and film made by and for the local creative scene."},
+    {id:"blender", name:"Blender Foundation",   kind:"Studio", color:"#37D6C4", bio:"Pioneers of the open-movie project. Their short films are used the world over to demonstrate what independent, freely-licensed cinema can be. (Standing in as placeholder programming here.)"},
+    {id:"pdt",     name:"Public Domain Theater", kind:"Archive", color:"#5B8CFF", bio:"Our placeholder film vault — classic movies that have passed into the public domain, preserved by the Internet Archive. Every title here swaps out for BOP TV's own catalogue later."},
+    {id:"romero",  name:"George A. Romero",     kind:"Filmmaker", color:"#FF4D8D", bio:"Director of the 1968 landmark that invented the modern zombie film — and, thanks to a distributor's missing copyright notice, one of cinema's most-shared public-domain works."},
+    {id:"chaplin", name:"Charlie Chaplin",      kind:"Filmmaker", color:"#F4F1E8", bio:"The Tramp himself. His earliest silent shorts and features are public domain and remain some of the funniest films ever cut."},
+    {id:"keaton",  name:"Buster Keaton",        kind:"Filmmaker", color:"#7BD655", bio:"The Great Stone Face — silent comedy's fearless engineer of the impossible gag."},
+    {id:"lang",    name:"Fritz Lang",           kind:"Filmmaker", color:"#FFB23E", bio:"Master of shadow and dread, from German Expressionism to hard American film noir."}
+  ],
+  series:[
+    {id:"s-open", name:"The Open Movie Collection", creatorId:"blender", blurb:"A run of landmark open-source short films, presented as a BOP TV cinema strand."}
+  ],
+  shows:[
+    {id:"open-cinema", name:"Open Cinema", seriesId:"s-open", creatorId:"blender", blurb:"BOP TV's featured film strand — one short film at a time, no interruptions once it starts."},
+    {id:"graveyard-feature", name:"Graveyard Feature", seriesId:null, creatorId:"pdt", blurb:"The late-night movie. Monsters, camp, and cult horror for the wide awake."},
+    {id:"vault-cinema", name:"Vault Cinema", seriesId:null, creatorId:"pdt", blurb:"Classic features and hard-boiled noir, pulled from the archive."},
+    {id:"silent-corner", name:"The Silent Corner", seriesId:null, creatorId:"pdt", blurb:"The silent era — expressionist horror and the great stone-faced comedians."},
+    {id:"matinee", name:"The Matinee", seriesId:null, creatorId:"pdt", blurb:"Daytime comedies, musicals, and family pictures."},
+    {id:"cartoon-cavalcade", name:"Cartoon Cavalcade", seriesId:null, creatorId:"pdt", blurb:"Classic public-domain animation between the features."},
+    {id:"two-reelers", name:"Two-Reelers", seriesId:null, creatorId:"pdt", blurb:"Short comedy from the masters — Chaplin, Keaton, the Stooges, the Keystone gang."},
+    {id:"ad-break",    name:"The Ad Break", seriesId:null, creatorId:"bop", blurb:"Fake commercials, promos, and channel messages. The good part of TV, honestly."},
+    {id:"station",     name:"Station Idents", seriesId:null, creatorId:"bop", blurb:"The little BOP TV bumpers that play between programming. Generated live in your browser — logo, color bars, and a jingle."}
+  ],
+  /* content items: video items point at a URL; ident items are generated in-browser */
+  content:[
+    {id:"bbb",   title:"Big Buck Bunny",   showId:"open-cinema", creatorId:"blender", channelId:"one",       category:"Shorts", dur:596, url:SAMPLE+"BigBuckBunny.mp4",   hue:96,  desc:"A large, good-natured rabbit takes cartoonish revenge on three bullying rodents. A landmark open-source animated short."},
+    {id:"sintel",title:"Sintel",           showId:"open-cinema", creatorId:"blender", channelId:"graveyard", category:"Movies", dur:888, url:SAMPLE+"Sintel.mp4",         hue:16,  desc:"A lone traveler crosses a harsh world searching for a lost dragon. A wordless, wintry fantasy short."},
+    {id:"ed",    title:"Elephants Dream",  showId:"open-cinema", creatorId:"blender", channelId:"vault",     category:"Movies", dur:653, url:SAMPLE+"ElephantsDream.mp4", hue:280, desc:"Two characters wander a vast, shifting machine-world. The very first open movie — strange and beautiful."},
+    {id:"tos",   title:"Tears of Steel",   showId:"open-cinema", creatorId:"blender", channelId:"graveyard", category:"Movies", dur:734, url:SAMPLE+"TearsOfSteel.mp4",   hue:200, desc:"A group tries to save a future Amsterdam from rogue machines. Live-action sci-fi with heavy visual effects."},
+    {id:"fbf",   title:"For Bigger Fun",       showId:"ad-break", creatorId:"bop", channelId:"one",       category:"Promos", dur:60, url:SAMPLE+"ForBiggerFun.mp4",       hue:44,  desc:"A short promo spot standing in for a BOP TV channel message."},
+    {id:"fbb",   title:"For Bigger Blazes",    showId:"ad-break", creatorId:"bop", channelId:"one",       category:"Promos", dur:60, url:SAMPLE+"ForBiggerBlazes.mp4",    hue:8,   desc:"A short promo spot standing in for a fake commercial."},
+    {id:"fbe",   title:"For Bigger Escapes",   showId:"ad-break", creatorId:"bop", channelId:"graveyard", category:"Promos", dur:60, url:SAMPLE+"ForBiggerEscapes.mp4",   hue:320, desc:"A short promo spot standing in for an event promo."},
+    {id:"fbj",   title:"For Bigger Joyrides",  showId:"ad-break", creatorId:"bop", channelId:"vault",     category:"Promos", dur:60, url:SAMPLE+"ForBiggerJoyrides.mp4",  hue:170, desc:"A short promo spot standing in for a sponsor slot."},
+    {id:"fbm",   title:"For Bigger Meltdowns", showId:"ad-break", creatorId:"bop", channelId:"vault",     category:"Promos", dur:60, url:SAMPLE+"ForBiggerMeltdowns.mp4", hue:230, desc:"A short promo spot standing in for a submission call."},
+    /* ---- public-domain features (Internet Archive) — swap for BOP TV's own catalogue later ---- */
+    {id:"notld",    title:"Night of the Living Dead",        showId:"graveyard-feature", creatorId:"romero", channelId:"graveyard", category:"Late Night", dur:5760, url:ARC+"Night_of_the_Living_Dead.mp4",        hue:130, desc:"1968. The dead return and the living barricade a farmhouse. The film that invented the modern zombie — and slipped into the public domain by accident."},
+    {id:"carnival", title:"Carnival of Souls",               showId:"graveyard-feature", creatorId:"pdt",    channelId:"graveyard", category:"Late Night", dur:4680, url:ARC+"Carnival_of_Souls.mp4",               hue:265, desc:"1962. A woman survives a crash and is drawn toward an abandoned pavilion. A haunting, dreamlike cult classic shot on almost no money."},
+    {id:"bucket",   title:"A Bucket of Blood",               showId:"graveyard-feature", creatorId:"pdt",    channelId:"graveyard", category:"Late Night", dur:3960, url:ARC+"A_Bucket_of_Blood.mp4",               hue:350, desc:"1959. A busboy becomes a celebrated sculptor by a very dark method. Roger Corman's beatnik horror-comedy, shot in five days."},
+    {id:"teens",    title:"Teenagers from Outer Space",      showId:"graveyard-feature", creatorId:"pdt",    channelId:"graveyard", category:"Late Night", dur:5160, url:ARC+"Teenagers_from_Outer_Space.mp4",      hue:285, desc:"1959. Alien youths bring a ray gun and giant lobster monsters to a small town. Gloriously threadbare drive-in sci-fi."},
+    {id:"santa",    title:"Santa Claus Conquers the Martians",showId:"graveyard-feature",creatorId:"pdt",    channelId:"graveyard", category:"Late Night", dur:4860, url:ARC+"Santa_Claus_Conquers_the_Martians.mp4",hue:150, desc:"1964. Martians kidnap Santa to bring cheer to their gloomy kids. Perennial 'so-bad-it's-wonderful' holiday camp."},
+    {id:"detour",   title:"Detour",                          showId:"vault-cinema", creatorId:"pdt",    channelId:"vault", category:"Classics", dur:4080, url:ARC+"Detour.mp4",                         hue:210, desc:"1945. A hitchhiking pianist's luck curdles into doom. A lean, fatalistic masterpiece of poverty-row noir."},
+    {id:"doa",      title:"D.O.A.",                          showId:"vault-cinema", creatorId:"pdt",    channelId:"vault", category:"Classics", dur:4980, url:ARC+"D.O.A._1949.mp4",                    hue:190, desc:"1949. A man reports his own murder, then races to solve it before a slow poison finishes the job."},
+    {id:"scarlet",  title:"Scarlet Street",                  showId:"vault-cinema", creatorId:"lang",   channelId:"vault", category:"Classics", dur:6120, url:ARC+"Scarlet_Street.mp4",                 hue:5,   desc:"1945. Fritz Lang's pitch-black tale of a meek cashier undone by obsession. Noir at its cruelest."},
+    {id:"hewalked", title:"He Walked by Night",              showId:"vault-cinema", creatorId:"pdt",    channelId:"vault", category:"Classics", dur:4740, url:ARC+"He_Walked_By_Night.mp4",              hue:220, desc:"1948. A methodical manhunt through the L.A. storm drains. The docu-noir that inspired Dragnet."},
+    {id:"nosferatu",title:"Nosferatu",                       showId:"silent-corner", creatorId:"pdt",   channelId:"vault", category:"Classics", dur:5640, url:ARC+"Nosferatu.mp4",                      hue:240, desc:"1922. The original screen vampire. Murnau's silent expressionist landmark still crawls under the skin."},
+    {id:"steamboat",title:"Steamboat Bill, Jr.",             showId:"silent-corner", creatorId:"keaton",channelId:"vault", category:"Classics", dur:4200, url:ARC+"Steamboat_Bill.mp4",                 hue:45,  desc:"1928. Keaton versus a cyclone — home of the most famous stunt in silent comedy, a falling house facade."},
+    {id:"reefer",   title:"Reefer Madness",                  showId:"matinee", creatorId:"pdt", channelId:"one", category:"Matinee", dur:3960, url:ARC+"Reefer_Madness.mp4",                 hue:95,  desc:"1936. A hysterical anti-drug scare film that became a midnight-movie comedy legend."},
+    {id:"africa",   title:"Africa Screams",                  showId:"matinee", creatorId:"pdt", channelId:"one", category:"Matinee", dur:4740, url:ARC+"Africa_Screams.mp4",                 hue:30,  desc:"1949. Abbott & Costello bumble through a jungle expedition. Breezy, gag-packed comedy."},
+    {id:"brunette", title:"My Favorite Brunette",            showId:"matinee", creatorId:"pdt", channelId:"one", category:"Matinee", dur:5220, url:ARC+"My_Favorite_Brunette.mp4",            hue:300, desc:"1947. Bob Hope as a baby photographer mistaken for a private eye. Snappy noir spoof."},
+    {id:"gulliver", title:"Gulliver's Travels",              showId:"matinee", creatorId:"pdt", channelId:"one", category:"Matinee", dur:4560, url:ARC+"Gullivers_Travels.mp4",              hue:185, desc:"1939. Fleischer Studios' lavish animated feature — the shipwrecked giant among the tiny folk of Lilliput."},
+    {id:"deuces",   title:"The Flying Deuces",               showId:"matinee", creatorId:"pdt", channelId:"one", category:"Matinee", dur:4140, url:ARC+"Flying_Deuces.mp4",                  hue:60,  desc:"1939. Laurel & Hardy join the Foreign Legion to mend a broken heart. Prime slapstick."},
+    {id:"shedone",  title:"She Done Him Wrong",              showId:"matinee", creatorId:"pdt", channelId:"one", category:"Matinee", dur:3960, url:ARC+"She_Done_Him_Wrong.mp4",              hue:330, desc:"1933. Mae West trades wisecracks in the Gay Nineties. 'Why don't you come up sometime and see me?'"},
+    {id:"oneweek",  title:"One Week",                        showId:"two-reelers", creatorId:"keaton",  channelId:"vault", category:"Shorts", dur:1500, url:ARC+"One_Week.mp4",                     hue:50,  desc:"1920. Newlyweds assemble a build-it-yourself house — disastrously. Keaton's first great short."},
+    {id:"janitor",  title:"Charlie Chaplin: The New Janitor",showId:"two-reelers", creatorId:"chaplin", channelId:"one", category:"Shorts", dur:780,  url:ARC+"Charlie_Chaplin_The_New_Janitor.mp4",hue:200, desc:"1914. The Tramp mops, bumbles, and foils a robbery. Early Keystone Chaplin."},
+    {id:"mabel",    title:"Mabel's Strange Predicament",     showId:"two-reelers", creatorId:"chaplin", channelId:"one", category:"Shorts", dur:1020, url:ARC+"Charlie_Chaplin_Mabels_Strange_Predicament.mp4", hue:20, desc:"1914. Hotel-hallway chaos — and one of the very first appearances of the Tramp costume."},
+    {id:"stooges",  title:"Three Stooges: Disorder in the Court",showId:"two-reelers", creatorId:"pdt", channelId:"one", category:"Shorts", dur:1020, url:ARC+"Disorder_in_the_Court.mp4",           hue:120, desc:"1936. The boys take the witness stand. Peak public-domain Stooges anarchy."},
+    {id:"popeye",   title:"Popeye Meets Aladdin",            showId:"cartoon-cavalcade", creatorId:"pdt", channelId:"one", category:"Cartoons", dur:1020, url:ARC+"Popeye_Meets_Aladdin.mp4",        hue:40,  desc:"1939. A two-reel Technicolor special — spinach meets the magic lamp."},
+    {id:"betty",    title:"Betty Boop: My Friend the Monkey",showId:"cartoon-cavalcade", creatorId:"pdt", channelId:"one", category:"Cartoons", dur:420,  url:ARC+"Betty_Boop_My_Friend_the_Monkey.mp4",hue:300, desc:"1939. Betty adopts a mischievous monkey and the house pays for it. Fleischer cartoon fun."},
+    /* generated idents — no URL; rendered on canvas with synthesized audio */
+    {id:"id-power",title:"BOP TV — Sign On",   showId:"station", creatorId:"bop", channelId:"one",       category:"Idents", dur:9,  ident:"power", hue:40,  desc:"A CRT power-on station identification."},
+    {id:"id-bars", title:"BOP TV — Color Bars",showId:"station", creatorId:"bop", channelId:"one",       category:"Idents", dur:8,  ident:"bars",  hue:52,  desc:"The classic broadcast test pattern and tone, BOP TV style."},
+    {id:"id-star", title:"BOP TV — Starburst",  showId:"station", creatorId:"bop", channelId:"one",       category:"Idents", dur:7,  ident:"star",  hue:300, desc:"A little animated logo sting with a xylophone jingle."},
+    {id:"brb",     title:"We'll Be Right Back", showId:"station", creatorId:"bop", channelId:"one",       category:"Idents", dur:10, ident:"brb",   hue:36,  desc:"The break card that keeps a seat warm between segments."}
+  ],
+  /* per-channel repeating daily playlists — resolved against the wall clock */
+  playlists:{
+    one:      ["id-power","fbf","deuces","id-star","betty","brb","gulliver","id-bars","stooges","fbb","brunette","bbb","id-star","popeye","brb","africa","id-power","janitor","fbf","shedone","id-bars","mabel","reefer"],
+    vault:    ["id-bars","detour","id-star","oneweek","brb","nosferatu","fbj","hewalked","id-power","steamboat","brb","doa","id-star","scarlet","id-bars","ed"],
+    graveyard:["id-power","notld","brb","fbe","carnival","id-bars","teens","id-star","bucket","brb","santa","fbm","sintel","id-power","tos"]
+  }
+};
+
+/* quick lookup maps */
+const byId = {};
+DATA.content.forEach(c=>byId[c.id]=c);
+const chanById = {}; DATA.channels.forEach(c=>chanById[c.id]=c);
+const showById = {}; DATA.shows.forEach(s=>showById[s.id]=s);
+const seriesById = {}; DATA.series.forEach(s=>seriesById[s.id]=s);
+const creatorById = {}; DATA.creators.forEach(c=>creatorById[c.id]=c);
+
+/* ---------- 2. GENERATED ART (logos + posters) ---------- */
+function brandLogo(h){ // h = height px
+  return `<svg viewBox="0 0 168 40" height="${h}" role="img" aria-label="BOP TV">
+    <defs><linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFC868"/><stop offset="1" stop-color="#E8901A"/></linearGradient></defs>
+    <!-- the O as a little CRT with color bars -->
+    <rect x="30" y="6" width="30" height="28" rx="7" fill="#0b0b10" stroke="#2a2a36"/>
+    <g clip-path="url(#crt)"><clipPath id="crt"><rect x="33" y="9" width="24" height="22" rx="4"/></clipPath>
+      <rect x="33" y="9" width="4" height="22" fill="#F4F1E8"/><rect x="37" y="9" width="4" height="22" fill="#FFB23E"/>
+      <rect x="41" y="9" width="4" height="22" fill="#37D6C4"/><rect x="45" y="9" width="4" height="22" fill="#7BD655"/>
+      <rect x="49" y="9" width="4" height="22" fill="#FF4D8D"/><rect x="53" y="9" width="4" height="22" fill="#5B8CFF"/>
+    </g>
+    <text x="2" y="31" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="30" fill="url(#bg1)">B</text>
+    <text x="62" y="31" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="30" fill="url(#bg1)">P</text>
+    <text x="92" y="31" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="30" fill="#F4F1E8">TV</text>
+    <circle cx="150" cy="12" r="4" fill="#37D6C4"/>
+  </svg>`;
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function poster(item){
+  const c = chanById[item.channelId] || {color:"#FFB23E"};
+  const h = item.hue!=null?item.hue:40;
+  const t = esc(item.title);
+  const isIdent = !!item.ident;
+  const barY = isIdent? "" : `<g opacity=".9"><rect x="0" y="0" width="10" height="100%" fill="hsl(${h} 70% 60%)"/></g>`;
+  return `data:image/svg+xml;utf8,`+encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180">
+     <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+       <stop offset="0" stop-color="hsl(${h} 45% 22%)"/><stop offset="1" stop-color="hsl(${(h+40)%360} 40% 10%)"/></linearGradient>
+       <pattern id="sl" width="1" height="3" patternUnits="userSpaceOnUse"><rect width="1" height="1" fill="rgba(255,255,255,.04)"/></pattern></defs>
+     <rect width="320" height="180" fill="url(#g)"/>
+     <rect width="320" height="180" fill="url(#sl)"/>
+     ${isIdent?`<g><rect x="118" y="58" width="84" height="64" rx="10" fill="#0b0b10" stroke="rgba(255,255,255,.15)"/>
+        <rect x="128" y="68" width="8" height="44" fill="#F4F1E8"/><rect x="138" y="68" width="8" height="44" fill="#FFB23E"/>
+        <rect x="148" y="68" width="8" height="44" fill="#37D6C4"/><rect x="158" y="68" width="8" height="44" fill="#7BD655"/>
+        <rect x="168" y="68" width="8" height="44" fill="#FF4D8D"/><rect x="178" y="68" width="8" height="44" fill="#5B8CFF"/></g>`:barY}
+     <text x="20" y="150" font-family="Bricolage Grotesque,Arial,sans-serif" font-weight="800" font-size="22" fill="#F4F1E8">${t}</text>
+     <circle cx="298" cy="22" r="6" fill="${c.color}"/>
+   </svg>`);
+}
+function fmtDur(s){const m=Math.floor(s/60),ss=Math.round(s%60);return m+":"+String(ss).padStart(2,"0")}
+function fmtClock(ms){const d=new Date(ms);let h=d.getHours(),m=d.getMinutes();const ap=h>=12?"PM":"AM";h=h%12||12;return h+":"+String(m).padStart(2,"0")+" "+ap}
+
+/* ---------- 3. THE ENGINE (simulated linear playhead) ---------- */
+function loopLen(chId){return DATA.playlists[chId].reduce((s,id)=>s+byId[id].dur,0)}
+function airingAt(chId, nowMs){
+  const pl = DATA.playlists[chId], L = loopLen(chId);
+  let t = Math.floor(nowMs/1000) % L, acc=0;
+  for(let i=0;i<pl.length;i++){
+    const item = byId[pl[i]];
+    if(t < acc+item.dur){
+      return {i, item, offset:t-acc, startMs:nowMs-(t-acc)*1000, endMs:nowMs+(item.dur-(t-acc))*1000, L};
+    }
+    acc+=item.dur;
+  }
+  return {i:0, item:byId[pl[0]], offset:0, startMs:nowMs, endMs:nowMs+byId[pl[0]].dur*1000, L};
+}
+function upcoming(chId, nowMs, count){
+  const pl=DATA.playlists[chId], cur=airingAt(chId,nowMs), out=[]; let clock=cur.endMs;
+  for(let n=1;n<=count;n++){
+    const idx=(cur.i+n)%pl.length, item=byId[pl[idx]];
+    out.push({item, startMs:clock}); clock+=item.dur*1000;
+  }
+  return out;
+}
+/* project a channel's schedule across a time window for the guide */
+function project(chId, fromMs, windowSec){
+  const pl=DATA.playlists[chId], cur=airingAt(chId,fromMs), out=[]; 
+  let clock=cur.startMs, idx=cur.i; const end=fromMs+windowSec*1000; let guard=0;
+  while(clock<end && guard<80){
+    const item=byId[pl[idx]];
+    out.push({item, startMs:clock, endMs:clock+item.dur*1000});
+    clock+=item.dur*1000; idx=(idx+1)%pl.length; guard++;
+  }
+  return out;
+}
+
+/* ---------- 4. AUDIO (synthesized idents) ---------- */
+let AC=null, masterMuted=false;
+function audio(){ if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}} if(AC&&AC.state==="suspended")AC.resume(); return AC; }
+function tone(freq,start,dur,type="sine",vol=.18){
+  const ac=audio(); if(!ac||masterMuted)return;
+  const t0=ac.currentTime+start, o=ac.createOscillator(), g=ac.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(vol,t0+.02);
+  g.gain.exponentialRampToValueAtTime(.0008,t0+dur);
+  o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0+dur+.05);
+}
+function sweep(f1,f2,start,dur,type="sawtooth",vol=.14){
+  const ac=audio(); if(!ac||masterMuted)return;
+  const t0=ac.currentTime+start,o=ac.createOscillator(),g=ac.createGain();
+  o.type=type;o.frequency.setValueAtTime(f1,t0);o.frequency.exponentialRampToValueAtTime(f2,t0+dur);
+  g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.03);g.gain.exponentialRampToValueAtTime(.0008,t0+dur);
+  o.connect(g).connect(ac.destination);o.start(t0);o.stop(t0+dur+.05);
+}
+function jingle(kind){
+  if(masterMuted) return;
+  if(kind==="power"){ sweep(180,760,0,.6,"sawtooth",.12); tone(880,.55,.5,"triangle",.16); tone(1320,.55,.5,"triangle",.10); }
+  else if(kind==="bars"){ tone(660,0,.5,"sine",.14); tone(880,.5,.6,"sine",.14); }
+  else if(kind==="star"){ [523,659,784,1046].forEach((f,i)=>tone(f,i*.11,.28,"triangle",.16)); }
+  else if(kind==="brb"){ tone(110,0,.9,"sine",.16); tone(220,0,.9,"sine",.06); tone(164,.45,.8,"sine",.10); }
+}
+
+/* ---------- 5. IDENT RENDERER (canvas animation) ---------- */
+let identRAF=null;
+function drawIdent(canvas, kind, t0){
+  cancelAnimationFrame(identRAF);
+  const ctx=canvas.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+  function frame(now){
+    const W=canvas.width=canvas.clientWidth*devicePixelRatio, H=canvas.height=canvas.clientHeight*devicePixelRatio;
+    const el=(now-t0)/1000; ctx.clearRect(0,0,W,H); ctx.fillStyle="#0b0b10"; ctx.fillRect(0,0,W,H);
+    const cx=W/2, cy=H/2, u=Math.min(W,H);
+    if(kind==="bars"){
+      const cols=["#F4F1E8","#FFB23E","#37D6C4","#7BD655","#FF4D8D","#5B8CFF","#101018"];
+      const bw=W/cols.length;
+      cols.forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(i*bw,0,bw+1,H*0.72)});
+      ctx.fillStyle="#101018";ctx.fillRect(0,H*0.72,W,H*0.28);
+      ctx.fillStyle="#F4F1E8";ctx.font=`800 ${u*0.08}px 'Bricolage Grotesque',sans-serif`;ctx.textAlign="center";
+      ctx.fillText("BOP TV",cx,H*0.9);
+      if(!reduce){const sy=(el*H*0.4)%H;ctx.fillStyle="rgba(255,255,255,.06)";ctx.fillRect(0,sy,W,3)}
+    } else if(kind==="power"){
+      const open=Math.min(1,el/0.5), glow=Math.max(0,1-Math.abs(el-0.6));
+      ctx.save();ctx.translate(cx,cy);
+      const hh=open*H*0.5, ww=Math.min(1,Math.max(0,(el-0.35)/0.4))*W*0.5;
+      ctx.fillStyle="#F4F1E8";
+      if(el<0.5){ctx.fillRect(-W*0.5,-2,W,4);} else {
+        ctx.globalAlpha=0.14+glow*0.3;ctx.fillStyle="#FFB23E";ctx.fillRect(-ww,-hh,ww*2,hh*2);ctx.globalAlpha=1;
+        ctx.fillStyle="#FFB23E";ctx.font=`800 ${u*0.13}px 'Bricolage Grotesque',sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
+        ctx.shadowColor="#FFB23E";ctx.shadowBlur=el>0.55?26:0;ctx.fillText("BOP TV",0,0);ctx.shadowBlur=0;
+      }
+      ctx.restore();
+    } else if(kind==="star"){
+      const bob=reduce?0:Math.sin(el*4)*u*0.03, rot=reduce?0:el*0.8;
+      ctx.save();ctx.translate(cx,cy+bob);ctx.rotate(rot);
+      ctx.fillStyle="#FFB23E";const R=u*0.16,r=u*0.07,N=5;ctx.beginPath();
+      for(let i=0;i<N*2;i++){const rad=i%2?r:R,a=Math.PI/N*i-Math.PI/2;ctx.lineTo(Math.cos(a)*rad,Math.sin(a)*rad)}
+      ctx.closePath();ctx.fill();ctx.restore();
+      ctx.fillStyle="#F4F1E8";ctx.font=`800 ${u*0.07}px 'Bricolage Grotesque',sans-serif`;ctx.textAlign="center";
+      ctx.fillText("BOP TV",cx,cy+u*0.3);
+    } else if(kind==="brb"){
+      ctx.fillStyle="#12121a";ctx.fillRect(0,0,W,H);
+      const p=reduce?1:(0.6+0.4*Math.abs(Math.sin(el*1.5)));
+      ctx.fillStyle=`rgba(255,178,62,${0.9*p})`;ctx.font=`800 ${u*0.075}px 'Bricolage Grotesque',sans-serif`;ctx.textAlign="center";
+      ctx.fillText("We'll be right back",cx,cy);
+      ctx.fillStyle="#9B9BAA";ctx.font=`500 ${u*0.03}px 'Instrument Sans',sans-serif`;
+      ctx.fillText("BOP TV",cx,cy+u*0.12);
+    }
+    if(!reduce) identRAF=requestAnimationFrame(frame);
+  }
+  identRAF=requestAnimationFrame(frame);
+}
+
+/* animated "now playing" card — loading state + preview fallback when real video can't load */
+function drawProgram(canvas,item,t0){
+  cancelAnimationFrame(identRAF);
+  const ctx=canvas.getContext("2d");
+  const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const ch=chanById[item.channelId]||{color:"#FFB23E"};
+  const hue=item.hue!=null?item.hue:40;
+  function frame(now){
+    const W=canvas.width=canvas.clientWidth*devicePixelRatio,H=canvas.height=canvas.clientHeight*devicePixelRatio;
+    const el=(now-t0)/1000,u=Math.min(W,H);
+    const g=ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,`hsl(${hue} 45% 15%)`);g.addColorStop(1,`hsl(${(hue+40)%360} 45% 7%)`);
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    if(!reduce){const x=((el*0.10)%1.3-0.15)*W;const lg=ctx.createLinearGradient(x-u*0.5,0,x+u*0.5,0);
+      lg.addColorStop(0,"rgba(255,255,255,0)");lg.addColorStop(.5,"rgba(255,255,255,.06)");lg.addColorStop(1,"rgba(255,255,255,0)");
+      ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);}
+    ctx.fillStyle=ch.color;ctx.beginPath();ctx.arc(W*0.11,H*0.19,u*0.018,0,7);ctx.fill();
+    ctx.fillStyle="#B9B9C6";ctx.textAlign="left";ctx.textBaseline="alphabetic";
+    ctx.font=`600 ${u*0.03}px 'Instrument Sans',system-ui,sans-serif`;
+    ctx.fillText("NOW PLAYING",W*0.11+u*0.05,H*0.205);
+    let fs=u*0.095;ctx.font=`800 ${fs}px 'Bricolage Grotesque',system-ui,sans-serif`;
+    const title=item.title;
+    while(ctx.measureText(title).width>W*0.82&&fs>u*0.04){fs-=1;ctx.font=`800 ${fs}px 'Bricolage Grotesque',system-ui,sans-serif`;}
+    ctx.fillStyle="#F4F1E8";ctx.fillText(title,W*0.11,H*0.55);
+    const n=22,bw=(W*0.78)/n,bx=W*0.11,by=H*0.80;
+    for(let i=0;i<n;i++){
+      const ph=reduce?0.35:(0.5+0.5*Math.sin(el*4+i*0.5)*Math.sin(el*1.3+i*0.7));
+      const bh=Math.max(u*0.008,Math.abs(ph)*u*0.13);
+      ctx.fillStyle=`hsl(${(hue+i*7)%360} 68% 60%)`;ctx.globalAlpha=0.9;
+      ctx.fillRect(bx+i*bw,by-bh,bw*0.58,bh);ctx.globalAlpha=1;
+    }
+    ctx.fillStyle="rgba(244,241,232,.45)";ctx.font=`500 ${u*0.025}px 'Instrument Sans',system-ui,sans-serif`;
+    ctx.fillText("BOP TV · picture simulated in preview",W*0.11,H*0.93);
+    if(!reduce)identRAF=requestAnimationFrame(frame);
+  }
+  identRAF=requestAnimationFrame(frame);
+}
+
+/* ---------- 6. ROUTER ---------- */
+function go(route){ if(location.hash!=="#"+route) location.hash=route; else render(); }
+window.addEventListener("hashchange",render);
+
+/* ---------- 7. LIVE PLAYER STATE ---------- */
+let liveState={chId:"one", tuned:false, tickTimer:null, curId:null, video:null, canvas:null};
+
+function stopLive(){
+  if(liveState.tickTimer){clearInterval(liveState.tickTimer);liveState.tickTimer=null}
+  cancelAnimationFrame(identRAF);
+  if(liveState.video){liveState.video.pause();liveState.video.removeAttribute("src");liveState.video.load()}
+  liveState.curId=null;
+}
+
+/* ---------- 8. VIEWS ---------- */
+const V=document.getElementById("view");
+const announcer=document.getElementById("announcer");
+function announce(msg){announcer.textContent="";setTimeout(()=>announcer.textContent=msg,60)}
+
+function setNav(route){
+  document.querySelectorAll(".navlink").forEach(b=>{
+    const on=("/"+ (route.split("/")[1]||"live"))===b.dataset.route;
+    if(on)b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
+  });
+}
+function focusMain(){const m=document.getElementById("main");if(m)m.focus()}
+
+function render(){
+  const hash=location.hash.replace(/^#/,"")||"/live";
+  const parts=hash.split("/").filter(Boolean); // e.g. ["watch","bbb"]
+  const root="/"+(parts[0]||"live");
+  setNav(root);
+  if(root!=="/live") stopLive();
+  if(parts[0]==="watch"){renderWatch(parts[1])}
+  else if(parts[0]==="show"){renderShow(parts[1])}
+  else if(parts[0]==="series"){renderSeries(parts[1])}
+  else if(parts[0]==="creator"){renderCreator(parts[1])}
+  else if(parts[0]==="channel"){renderChannelPage(parts[1])}
+  else if(parts[0]==="guide"){renderGuide()}
+  else if(parts[0]==="ondemand"){renderOnDemand()}
+  else if(parts[0]==="about"){renderAbout()}
+  else {renderLive()}
+  focusMain();
+}
+
+/* ---- LIVE ---- */
+function renderLive(){
+  const ch=chanById[liveState.chId];
+  V.innerHTML=`
+    <div class="chan-row" role="tablist" aria-label="Channels">
+      ${DATA.channels.map(c=>`
+        <button class="chan-pill" role="tab" aria-pressed="${c.id===liveState.chId}" data-ch="${c.id}">
+          <span class="dot" style="background:${c.color}"></span>
+          <span><span class="cn">${esc(c.name)}</span><br><span class="cnum">CH ${c.number}</span></span>
+        </button>`).join("")}
+    </div>
+    <div class="stage-wrap">
+      <div class="stage" id="stage">
+        <video id="liveVideo" playsinline preload="auto" aria-label="Live channel video"></video>
+        <canvas id="liveCanvas" style="display:none" aria-hidden="true"></canvas>
+        <div class="scanlines"></div><div class="vignette"></div>
+        <div class="onair"><span class="rec"></span><b>ON AIR</b></div>
+        <div class="chan-badge"><span class="num">CH ${ch.number}</span> ${esc(ch.name)}</div>
+        <div class="slate" id="slate">
+          <div class="bars">${barsSVG()}</div>
+          <strong>Adjusting the antenna…</strong>
+          <span>This placeholder feed is slow to load in preview. The channel clock is still running — the next segment will pick right up.</span>
+        </div>
+        <div class="gate" id="gate" role="button" tabindex="0" aria-label="Tune in to ${esc(ch.name)}">
+          <div class="bars">${barsSVG()}</div>
+          <h2>You're tuning in to ${esc(ch.name)}</h2>
+          <p>Already in progress — just like real TV. Press to bring up the picture and sound.</p>
+          <span class="tune-btn">▶ Tune in</span>
+        </div>
+        <div class="stage-controls" id="liveControls" style="display:none">
+          <button class="ic-btn" id="muteBtn" aria-label="Turn sound on">${icon("mute")}</button>
+          <div class="live-progress" aria-hidden="true"><i id="liveBar"></i></div>
+          <button class="ic-btn" id="fsBtn" aria-label="Fullscreen">${icon("fs")}</button>
+        </div>
+      </div>
+    </div>
+    <div class="now-panel">
+      <div class="chyron" id="chyron" aria-live="off"></div>
+      <div class="upnext"><h3>Up next on ${esc(ch.name)}</h3><div class="strip" id="strip"></div></div>
+    </div>`;
+
+  // channel switch
+  V.querySelectorAll(".chan-pill").forEach(b=>b.addEventListener("click",()=>{
+    liveState.chId=b.dataset.ch; liveState.tuned=liveState.tuned; renderLive();
+    if(liveState.tuned){startTicking();} 
+  }));
+
+  liveState.video=document.getElementById("liveVideo");
+  liveState.canvas=document.getElementById("liveCanvas");
+  const gate=document.getElementById("gate");
+  const tune=()=>{liveState.tuned=true;audio();document.getElementById("gate").style.display="none";
+    document.getElementById("liveControls").style.display="flex";liveState.video.muted=masterMuted;startTicking();};
+  gate.addEventListener("click",tune);
+  gate.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tune()}});
+
+  document.getElementById("muteBtn").addEventListener("click",toggleMute);
+  document.getElementById("fsBtn").addEventListener("click",enterFullscreen);
+  liveState.video.addEventListener("ended",()=>tickLive(true));
+
+  paintNow(); // paint chyron/upnext immediately even before tuning
+  if(liveState.tuned){document.getElementById("gate").style.display="none";
+    document.getElementById("liveControls").style.display="flex";startTicking();}
+}
+function showSlate(on){const s=document.getElementById("slate");if(s)s.classList.toggle("show",on)}
+function toggleMute(){
+  masterMuted=!masterMuted;
+  if(liveState.video)liveState.video.muted=masterMuted;
+  const b=document.getElementById("muteBtn");
+  if(b){b.innerHTML=icon(masterMuted?"mute":"sound");b.setAttribute("aria-label",masterMuted?"Turn sound on":"Mute")}
+  announce(masterMuted?"Sound off":"Sound on");
+}
+function enterFullscreen(){
+  const stage=document.getElementById("stage"), v=liveState.video;
+  const iosVid = v && typeof v.webkitEnterFullscreen==="function";
+  /* iOS Safari only lets the <video> element go fullscreen — it auto-rotates to landscape */
+  if(iosVid && v.style.display!=="none" && v.readyState>=1){ try{v.webkitEnterFullscreen();return;}catch(e){} }
+  if(stage.requestFullscreen){ stage.requestFullscreen().catch(()=>{ if(iosVid){try{v.webkitEnterFullscreen()}catch(e){}} }); return; }
+  if(stage.webkitRequestFullscreen){ try{stage.webkitRequestFullscreen();return;}catch(e){} }
+  if(iosVid){ try{v.webkitEnterFullscreen()}catch(e){} }
+}
+function startTicking(){
+  if(liveState.tickTimer)clearInterval(liveState.tickTimer);
+  tickLive(true);
+  liveState.tickTimer=setInterval(()=>tickLive(false),1000);
+}
+function tickLive(force){
+  const air=airingAt(liveState.chId,Date.now());
+  const v=liveState.video, cv=liveState.canvas;
+  if(force || air.item.id!==liveState.curId){
+    liveState.curId=air.item.id;
+    if(liveState.failT){clearTimeout(liveState.failT);liveState.failT=null;}
+    paintNow();
+    if(air.item.ident){
+      v.pause();v.style.display="none";v.removeAttribute("src");v.load();
+      cv.style.display="block";showSlate(false);
+      drawIdent(cv,air.item.ident,performance.now()-air.offset*1000);
+      if(air.offset<1.4) jingle(air.item.ident); // only if caught near the top
+      announce("Now on air: "+air.item.title);
+    } else {
+      cancelAnimationFrame(identRAF);
+      v.muted=masterMuted; v.style.display="block"; cv.style.display="none";
+      v.src=air.item.url;
+      const showCard=()=>{cancelAnimationFrame(identRAF);v.style.display="none";cv.style.display="block";
+        drawProgram(cv,air.item,performance.now()-air.offset*1000);};
+      const showVid=()=>{if(liveState.failT){clearTimeout(liveState.failT);liveState.failT=null;}
+        cancelAnimationFrame(identRAF);cv.style.display="none";v.style.display="block";};
+      // if the picture hasn't started shortly, show the animated card (covers slow loads AND blocked preview media)
+      liveState.failT=setTimeout(showCard,700);
+      v.addEventListener("playing",showVid,{once:true});
+      v.addEventListener("error",()=>{if(liveState.failT)clearTimeout(liveState.failT);showCard();},{once:true});
+      const seek=()=>{
+        try{v.currentTime=Math.min(air.offset,(v.duration||air.item.dur)-0.3)}catch(e){}
+        const p=v.play();
+        if(p&&p.catch)p.catch(()=>{
+          if(!v.muted){v.muted=true;masterMuted=true;const mb=document.getElementById("muteBtn");
+            if(mb){mb.innerHTML=icon("mute");mb.setAttribute("aria-label","Turn sound on")}
+            announce("Muted — press sound on to hear the channel");}
+          v.play().catch(()=>{});
+        });
+        v.removeEventListener("loadedmetadata",seek);
+      };
+      v.addEventListener("loadedmetadata",seek);
+      announce("Now on air: "+air.item.title);
+    }
+  }
+  // progress bar within current segment
+  const bar=document.getElementById("liveBar");
+  if(bar){const pct=Math.min(100,((air.item.dur-(air.endMs-Date.now())/1000)/air.item.dur)*100);bar.style.width=pct+"%"}
+}
+function paintNow(){
+  const air=airingAt(liveState.chId,Date.now());
+  const it=air.item, show=showById[it.showId], cr=creatorById[it.creatorId], ch=chanById[liveState.chId];
+  const ups=upcoming(liveState.chId,Date.now(),4);
+  const chy=document.getElementById("chyron");
+  if(chy){
+    chy.innerHTML=`
+      <div class="kick"><span class="live-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--live)"></span> Now on air · ends ${fmtClock(air.endMs)}</div>
+      <h2>${esc(it.title)}</h2>
+      <div class="meta">
+        <span>${esc(show?show.name:"")}</span><span>${esc(it.category)}</span><span>${fmtDur(it.dur)}</span>
+      </div>
+      <p class="desc">${esc(it.desc)}</p>
+      <div class="links">
+        ${show?`<button class="chip" data-nav="/show/${show.id}">Series: ${esc(show.name)}</button>`:""}
+        ${cr?`<button class="chip" data-nav="/creator/${cr.id}">By ${esc(cr.name)}</button>`:""}
+        <button class="chip" data-nav="/channel/${ch.id}"><span class="sw" style="background:${ch.color}"></span>${esc(ch.name)}</button>
+        ${!it.ident?`<button class="chip" data-nav="/watch/${it.id}">▶ Watch from the start</button>`:""}
+      </div>`;
+  }
+  const strip=document.getElementById("strip");
+  if(strip){
+    strip.innerHTML=ups.map(u=>`
+      <div class="upcard">
+        <div class="time mono">${fmtClock(u.startMs)}</div>
+        <div class="poster"><img src="${poster(u.item)}" alt="" loading="lazy"></div>
+        <div class="ttl">${esc(u.item.title)}</div>
+        <div class="sub">${esc((showById[u.item.showId]||{}).name||u.item.category)}</div>
+      </div>`).join("");
+  }
+}
+
+/* ---- GUIDE ---- */
+function renderGuide(){
+  const now=Date.now(), windowSec=3*3600, slots=6, slotSec=windowSec/slots;
+  const timeLabels=[];for(let i=0;i<slots;i++){timeLabels.push(fmtClock(now+i*slotSec*1000))}
+  const rows=DATA.channels.map(ch=>{
+    const segs=project(ch.id,now,windowSec);
+    const cells=segs.map((s,idx)=>{
+      const startRef=idx===0?now:s.startMs;
+      const w=((s.endMs-startRef)/(windowSec*1000))*100;
+      const isLive=idx===0;
+      const show=showById[s.item.showId];
+      return `<button class="pcell ${isLive?'live':''}" style="flex:0 0 ${w}%" data-watch="${s.item.ident?'':s.item.id}">
+        <div class="pt">${isLive?'<span class="liveflag">● LIVE  </span>':''}${esc(s.item.title)}</div>
+        <div class="ps">${fmtClock(s.startMs)} · ${esc(show?show.name:s.item.category)}</div>
+      </button>`;
+    }).join("");
+    return `<div class="grow">
+      <div class="chan"><span class="cn"><span class="dot" style="background:${ch.color}"></span>${esc(ch.name)}</span><span class="cnum">CH ${ch.number}</span></div>
+      <div class="prog">${cells}</div>
+    </div>`;
+  }).join("");
+  V.innerHTML=`
+    <p class="eyebrow">What's on</p>
+    <h1 class="section-h">Guide</h1>
+    <p class="guide-note">Every channel is live right now — the amber line is this moment. Just like Pluto or a cable box: scroll to see what's coming, tap a program to jump to it on demand.</p>
+    <div class="guide"><div class="guide-scroll"><div class="guide-inner">
+      <div class="timebar"><div class="lab">CHANNEL</div><div class="slots">${timeLabels.map(t=>`<div class="slot">${t}</div>`).join("")}</div></div>
+      <div style="position:relative">${rows}<div class="nowline" style="left:150px"></div></div>
+    </div></div></div>`;
+  V.querySelectorAll(".pcell").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.watch)go("/watch/"+b.dataset.watch)}));
+}
+
+/* ---- ON DEMAND ---- */
+let vodFilter="All";
+function renderOnDemand(){
+  const cats=["All",...Array.from(new Set(DATA.content.filter(c=>!c.ident).map(c=>c.category)))];
+  const feature=byId["tos"];
+  V.innerHTML=`
+    <p class="eyebrow">Watch anytime</p>
+    <h1 class="section-h">On Demand</h1>
+    <div class="filter-row" role="group" aria-label="Filter by category">
+      ${cats.map(c=>`<button class="fbtn" data-cat="${c}" aria-pressed="${c===vodFilter}">${c}</button>`).join("")}
+    </div>
+    <div id="rails"></div>`;
+  V.querySelectorAll(".fbtn").forEach(b=>b.addEventListener("click",()=>{vodFilter=b.dataset.cat;renderOnDemand()}));
+  const rails=document.getElementById("rails");
+  const groups={};
+  DATA.content.filter(c=>!c.ident && (vodFilter==="All"||c.category===vodFilter)).forEach(c=>{
+    (groups[c.category]=groups[c.category]||[]).push(c);
+  });
+  rails.innerHTML=Object.keys(groups).map(cat=>`
+    <section class="rail" aria-label="${cat}">
+      <h2 class="rail-h">${cat}</h2>
+      <div class="rail-track">
+        ${groups[cat].map(it=>tileHTML(it)).join("")}
+      </div>
+    </section>`).join("") || `<p style="color:var(--ink-dim)">Nothing in this category yet.</p>`;
+  rails.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
+}
+function tileHTML(it){
+  const show=showById[it.showId];
+  return `<button class="tile" data-id="${it.id}" aria-label="Watch ${esc(it.title)}">
+    <div class="poster"><img src="${poster(it)}" alt="" loading="lazy"></div>
+    <div class="ttl">${esc(it.title)}</div>
+    <div class="sub">${esc(show?show.name:it.category)} · ${fmtDur(it.dur)}</div>
+  </button>`;
+}
+
+/* ---- WATCH (detail + cross links) ---- */
+function renderWatch(id){
+  const it=byId[id];
+  if(!it||it.ident){V.innerHTML=notFound();return}
+  const show=showById[it.showId], series=show?seriesById[show.seriesId]:null, cr=creatorById[it.creatorId], ch=chanById[it.channelId];
+  const more=DATA.content.filter(c=>!c.ident && c.showId===it.showId && c.id!==it.id);
+  V.innerHTML=`
+    <button class="back-btn" onclick="history.back()">${icon("back")} Back</button>
+    <div class="watch-hero"><video controls playsinline preload="metadata" poster="${poster(it)}" src="${it.url}" aria-label="${esc(it.title)}"></video></div>
+    <div class="detail-head"><h1>${esc(it.title)}</h1></div>
+    <div class="detail-meta"><span>${esc(it.category)}</span><span>${fmtDur(it.dur)}</span>${show?`<span>${esc(show.name)}</span>`:""}</div>
+    <p class="detail-desc">${esc(it.desc)}</p>
+    <div class="detail-links">
+      ${show?`<button class="chip" data-nav="/show/${show.id}">Series: ${esc(show.name)}</button>`:""}
+      ${series?`<button class="chip" data-nav="/series/${series.id}">Collection: ${esc(series.name)}</button>`:""}
+      ${cr?`<button class="chip" data-nav="/creator/${cr.id}">By ${esc(cr.name)}</button>`:""}
+      <button class="chip" data-nav="/channel/${ch.id}"><span class="sw" style="background:${ch.color}"></span>Airs on ${esc(ch.name)}</button>
+    </div>
+    ${more.length?`<section class="rail"><h2 class="rail-h">More from ${esc(show.name)}</h2>
+      <div class="rail-track">${more.map(tileHTML).join("")}</div></section>`:""}`;
+  V.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
+}
+
+/* ---- SHOW / SERIES / CREATOR / CHANNEL pages (cross-reference hubs) ---- */
+function listPage({eyebrow,title,blurb,chips,items}){
+  V.innerHTML=`
+    <button class="back-btn" onclick="history.back()">${icon("back")} Back</button>
+    <p class="eyebrow">${esc(eyebrow)}</p>
+    <h1 class="section-h">${esc(title)}</h1>
+    ${blurb?`<p class="detail-desc">${esc(blurb)}</p>`:""}
+    ${chips?`<div class="detail-links">${chips}</div>`:""}
+    <section class="rail" style="margin-top:22px"><div class="rail-track">${items.map(tileHTML).join("")||'<p style="color:var(--ink-dim)">No episodes yet.</p>'}</div></section>`;
+  V.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
+}
+function renderShow(id){
+  const s=showById[id]; if(!s){V.innerHTML=notFound();return}
+  const series=seriesById[s.seriesId], cr=creatorById[s.creatorId];
+  const items=DATA.content.filter(c=>!c.ident && c.showId===id);
+  listPage({eyebrow:"Series",title:s.name,blurb:s.blurb,
+    chips:`${series?`<button class="chip" data-nav="/series/${series.id}">Collection: ${esc(series.name)}</button>`:""}${cr?`<button class="chip" data-nav="/creator/${cr.id}">By ${esc(cr.name)}</button>`:""}`,
+    items});
+}
+function renderSeries(id){
+  const s=seriesById[id]; if(!s){V.innerHTML=notFound();return}
+  const cr=creatorById[s.creatorId];
+  const shows=DATA.shows.filter(sh=>sh.seriesId===id);
+  const items=DATA.content.filter(c=>!c.ident && shows.some(sh=>sh.id===c.showId));
+  listPage({eyebrow:"Collection",title:s.name,blurb:s.blurb,
+    chips:cr?`<button class="chip" data-nav="/creator/${cr.id}">By ${esc(cr.name)}</button>`:"",items});
+}
+function renderCreator(id){
+  const cr=creatorById[id]; if(!cr){V.innerHTML=notFound();return}
+  const items=DATA.content.filter(c=>!c.ident && c.creatorId===id);
+  V.innerHTML=`
+    <button class="back-btn" onclick="history.back()">${icon("back")} Back</button>
+    <div class="profile-head">
+      <div class="profile-avatar" style="background:${cr.color}">${esc(cr.name[0])}</div>
+      <div><p class="eyebrow" style="margin:0">${esc(cr.kind)}</p><h1 style="font-size:28px">${esc(cr.name)}</h1></div>
+    </div>
+    <p class="detail-desc">${esc(cr.bio)}</p>
+    <section class="rail" style="margin-top:20px"><h2 class="rail-h">Programming</h2>
+      <div class="rail-track">${items.map(tileHTML).join("")}</div></section>`;
+  V.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
+}
+function renderChannelPage(id){
+  const ch=chanById[id]; if(!ch){V.innerHTML=notFound();return}
+  const air=airingAt(id,Date.now());
+  const items=DATA.content.filter(c=>!c.ident && c.channelId===id);
+  V.innerHTML=`
+    <button class="back-btn" onclick="history.back()">${icon("back")} Back</button>
+    <p class="eyebrow">Channel ${ch.number}</p>
+    <h1 class="section-h"><span class="sw" style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${ch.color}"></span> ${esc(ch.name)}</h1>
+    <p class="detail-desc">${esc(ch.tagline)}</p>
+    <div class="detail-links">
+      <button class="chip" onclick="liveState.chId='${id}';go('/live')">▶ Watch live — now: ${esc(air.item.title)}</button>
+    </div>
+    <section class="rail" style="margin-top:22px"><h2 class="rail-h">From this channel, on demand</h2>
+      <div class="rail-track">${items.map(tileHTML).join("")||'<p style="color:var(--ink-dim)">Nothing on demand yet.</p>'}</div></section>`;
+  V.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
+}
+
+/* ---- ABOUT ---- */
+function renderAbout(){
+  V.innerHTML=`
+    <div class="about">
+      <p class="eyebrow">What this is</p>
+      <h1 class="section-h">About BOP TV</h1>
+      <p class="lede">BOP TV is a scrappy independent television network — music, comedy, film, tabletop, and the strange creative stuff happening around us — built by Better Off Published.</p>
+      <p>Open it and you're already mid-broadcast, just like flipping on a real channel. Nothing here is a livestream server: the app reads the clock, works out what should be airing right now, and starts it at the right moment. Everyone tuning in sees the same thing at the same time.</p>
+      <h2>How it works today</h2>
+      <p>This is v0.001 — a proof of concept. The films are open-source placeholders standing in for our own catalog, and the station idents between programs are generated live in your browser: the logo, the color bars, and the little jingles are all made on the spot. Swapping in our real footage later is a data change, not a rebuild.</p>
+      <h2>Where it's going</h2>
+      <p>A free, ad-supported live channel; a full on-demand archive for members, ad-free; artist, show, and channel pages that link together so you can wander from a song to the band to the whole catalog. More channels, Pluto-style, as the library grows.</p>
+      <div class="callout"><strong style="color:var(--ink)">Built for everyone.</strong> Full keyboard control, screen-reader landmarks and announcements, honored reduced-motion, and a captions model throughout — targeting WCAG 2.2 AA.</div>
+    </div>`;
+}
+
+function notFound(){return `<button class="back-btn" onclick="history.back()">${icon("back")} Back</button>
+  <h1 class="section-h">Not found</h1><p style="color:var(--ink-dim)">That page isn't here. Try the Guide or On Demand.</p>`}
+
+/* ---------- 9. ICONS + small SVG ---------- */
+function icon(n){const s='width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  if(n==="mute")return `<svg ${s}><path d="M11 5 6 9H3v6h3l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>`;
+  if(n==="sound")return `<svg ${s}><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
+  if(n==="fs")return `<svg ${s}><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m8 0h3a2 2 0 0 0 2-2v-3"/></svg>`;
+  if(n==="back")return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`;
+  return "";
+}
+function barsSVG(){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 130" width="100%">
+  <g>${["#F4F1E8","#FFB23E","#37D6C4","#7BD655","#FF4D8D","#5B8CFF","#101018"].map((c,i)=>`<rect x="${i*30}" y="0" width="30" height="95" fill="${c}"/>`).join("")}</g>
+  <rect x="0" y="95" width="210" height="35" fill="#101018"/>
+  <text x="105" y="120" fill="#F4F1E8" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="20" text-anchor="middle">BOP TV</text></svg>`}
+
+/* ---------- 10. BOOT ---------- */
+document.getElementById("brandLink").innerHTML=brandLogo(30);
+document.getElementById("footBrand").textContent=DATA.config.appName;
+document.title=DATA.config.appName+" — "+DATA.config.tagline;
+function tickClock(){const c=document.getElementById("clock");if(c)c.textContent=fmtClock(Date.now())}
+tickClock();setInterval(tickClock,1000*20);
+document.querySelectorAll(".navlink").forEach(b=>b.addEventListener("click",()=>go(b.dataset.route)));
+document.addEventListener("click",e=>{const n=e.target.closest("[data-nav]");if(n){e.preventDefault();go(n.dataset.nav);}});
+render();
+</script>
+</body>
+</html>
