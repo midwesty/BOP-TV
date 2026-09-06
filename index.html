@@ -437,6 +437,7 @@ main{max-width:var(--maxw);margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px
 /* ---------- 1. DATA (the future JSON the Builder will edit) ---------- */
 const SAMPLE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/";
 const ARC = "https://archive.org/download/publicmovies212/"; // Internet Archive public-domain films (direct .mp4)
+const BF  = "https://archive.org/download/Sintel_201709/";   // Blender open movies on the Internet Archive (iOS-friendly)
 const DATA = {
   config:{
     appName:"BOP TV",
@@ -477,15 +478,15 @@ const DATA = {
   ],
   /* content items: video items point at a URL; ident items are generated in-browser */
   content:[
-    {id:"bbb",   title:"Big Buck Bunny",   showId:"open-cinema", creatorId:"blender", channelId:"one",       category:"Shorts", dur:596, url:SAMPLE+"BigBuckBunny.mp4",   hue:96,  desc:"A large, good-natured rabbit takes cartoonish revenge on three bullying rodents. A landmark open-source animated short."},
-    {id:"sintel",title:"Sintel",           showId:"open-cinema", creatorId:"blender", channelId:"graveyard", category:"Movies", dur:888, url:SAMPLE+"Sintel.mp4",         hue:16,  desc:"A lone traveler crosses a harsh world searching for a lost dragon. A wordless, wintry fantasy short."},
-    {id:"ed",    title:"Elephants Dream",  showId:"open-cinema", creatorId:"blender", channelId:"vault",     category:"Movies", dur:653, url:SAMPLE+"ElephantsDream.mp4", hue:280, desc:"Two characters wander a vast, shifting machine-world. The very first open movie — strange and beautiful."},
-    {id:"tos",   title:"Tears of Steel",   showId:"open-cinema", creatorId:"blender", channelId:"graveyard", category:"Movies", dur:734, url:SAMPLE+"TearsOfSteel.mp4",   hue:200, desc:"A group tries to save a future Amsterdam from rogue machines. Live-action sci-fi with heavy visual effects."},
-    {id:"fbf",   title:"For Bigger Fun",       showId:"ad-break", creatorId:"bop", channelId:"one",       category:"Promos", dur:60, url:SAMPLE+"ForBiggerFun.mp4",       hue:44,  desc:"A short promo spot standing in for a BOP TV channel message."},
-    {id:"fbb",   title:"For Bigger Blazes",    showId:"ad-break", creatorId:"bop", channelId:"one",       category:"Promos", dur:60, url:SAMPLE+"ForBiggerBlazes.mp4",    hue:8,   desc:"A short promo spot standing in for a fake commercial."},
-    {id:"fbe",   title:"For Bigger Escapes",   showId:"ad-break", creatorId:"bop", channelId:"graveyard", category:"Promos", dur:60, url:SAMPLE+"ForBiggerEscapes.mp4",   hue:320, desc:"A short promo spot standing in for an event promo."},
-    {id:"fbj",   title:"For Bigger Joyrides",  showId:"ad-break", creatorId:"bop", channelId:"vault",     category:"Promos", dur:60, url:SAMPLE+"ForBiggerJoyrides.mp4",  hue:170, desc:"A short promo spot standing in for a sponsor slot."},
-    {id:"fbm",   title:"For Bigger Meltdowns", showId:"ad-break", creatorId:"bop", channelId:"vault",     category:"Promos", dur:60, url:SAMPLE+"ForBiggerMeltdowns.mp4", hue:230, desc:"A short promo spot standing in for a submission call."},
+    {id:"bbb",   title:"Big Buck Bunny",   showId:"open-cinema", creatorId:"blender", channelId:"one",       category:"Shorts", dur:596, url:BF+"Big%20Buck%20Bunny.mp4",   hue:96,  desc:"A large, good-natured rabbit takes cartoonish revenge on three bullying rodents. A landmark open-source animated short."},
+    {id:"sintel",title:"Sintel",           showId:"open-cinema", creatorId:"blender", channelId:"graveyard", category:"Movies", dur:888, url:BF+"Sintel.mp4",         hue:16,  desc:"A lone traveler crosses a harsh world searching for a lost dragon. A wordless, wintry fantasy short."},
+    {id:"ed",    title:"Elephants Dream",  showId:"open-cinema", creatorId:"blender", channelId:"vault",     category:"Movies", dur:653, url:BF+"Elephants%20Dream.mp4", hue:280, desc:"Two characters wander a vast, shifting machine-world. The very first open movie — strange and beautiful."},
+    {id:"tos",   title:"Tears of Steel",   showId:"open-cinema", creatorId:"blender", channelId:"graveyard", category:"Movies", dur:734, url:BF+"Tears%20of%20Steel.mp4",   hue:200, desc:"A group tries to save a future Amsterdam from rogue machines. Live-action sci-fi with heavy visual effects."},
+    {id:"fbf",   title:"For Bigger Fun",       showId:"ad-break", creatorId:"bop", channelId:"one",       category:"Promos", dur:60, url:ARC+"Popeye_Meets_Aladdin.mp4",       hue:44,  desc:"A short promo spot standing in for a BOP TV channel message."},
+    {id:"fbb",   title:"For Bigger Blazes",    showId:"ad-break", creatorId:"bop", channelId:"one",       category:"Promos", dur:60, url:ARC+"Betty_Boop_My_Friend_the_Monkey.mp4",    hue:8,   desc:"A short promo spot standing in for a fake commercial."},
+    {id:"fbe",   title:"For Bigger Escapes",   showId:"ad-break", creatorId:"bop", channelId:"graveyard", category:"Promos", dur:60, url:ARC+"Popeye_for_President.mp4",   hue:320, desc:"A short promo spot standing in for an event promo."},
+    {id:"fbj",   title:"For Bigger Joyrides",  showId:"ad-break", creatorId:"bop", channelId:"vault",     category:"Promos", dur:60, url:ARC+"Disorder_in_the_Court.mp4",  hue:170, desc:"A short promo spot standing in for a sponsor slot."},
+    {id:"fbm",   title:"For Bigger Meltdowns", showId:"ad-break", creatorId:"bop", channelId:"vault",     category:"Promos", dur:60, url:ARC+"One_Week.mp4", hue:230, desc:"A short promo spot standing in for a submission call."},
     /* ---- public-domain features (Internet Archive) — swap for BOP TV's own catalogue later ---- */
     {id:"notld",    title:"Night of the Living Dead",        showId:"graveyard-feature", creatorId:"romero", channelId:"graveyard", category:"Late Night", dur:5760, url:ARC+"Night_of_the_Living_Dead.mp4",        hue:130, desc:"1968. The dead return and the living barricade a farmhouse. The film that invented the modern zombie — and slipped into the public domain by accident."},
     {id:"carnival", title:"Carnival of Souls",               showId:"graveyard-feature", creatorId:"pdt",    channelId:"graveyard", category:"Late Night", dur:4680, url:ARC+"Carnival_of_Souls.mp4",               hue:265, desc:"1962. A woman survives a crash and is drawn toward an abandoned pavilion. A haunting, dreamlike cult classic shot on almost no money."},
