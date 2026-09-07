@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
 <style>
 /* ============================================================
    BOP TV — v0.001 proof of concept
@@ -438,6 +439,25 @@ main{max-width:var(--maxw);margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px
 const SAMPLE = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/";
 const ARC = "https://archive.org/download/publicmovies212/"; // Internet Archive public-domain films (direct .mp4)
 const BF  = "https://archive.org/download/Sintel_201709/";   // Blender open movies on the Internet Archive (iOS-friendly)
+/* Bunny Stream — BOP TV's real media. Library 746502. Public values only. */
+const BUNNY = "vz-cf563389-49f.b-cdn.net";
+function bhls(guid){ return `https://${BUNNY}/${guid}/playlist.m3u8`; } // Bunny HLS playlist URL
+/* attach a source to a <video>, handling HLS (.m3u8) via native support or hls.js, and plain MP4 directly */
+function attachMedia(video, url){
+  detachMedia(video);
+  const isHls = /\.m3u8(\?|$)/.test(url);
+  if(isHls){
+    if(video.canPlayType("application/vnd.apple.mpegurl")){ video.src = url; }        // Safari / iOS native HLS
+    else if(window.Hls && window.Hls.isSupported()){                                    // Chrome/Firefox/etc via hls.js
+      const hls = new window.Hls({enableWorker:true, lowLatencyMode:false});
+      hls.on(window.Hls.Events.ERROR,(e,d)=>{ if(d && d.fatal){ try{hls.destroy()}catch(x){} } });
+      hls.loadSource(url); hls.attachMedia(video); video._hls = hls;
+    } else { video.src = url; }                                                         // last resort
+  } else { video.src = url; }                                                           // plain MP4
+}
+function detachMedia(video){
+  if(video && video._hls){ try{video._hls.destroy()}catch(e){} video._hls=null; }
+}
 const DATA = {
   config:{
     appName:"BOP TV",
@@ -459,7 +479,10 @@ const DATA = {
     {id:"chaplin", name:"Charlie Chaplin",      kind:"Filmmaker", color:"#F4F1E8", bio:"The Tramp himself. His earliest silent shorts and features are public domain and remain some of the funniest films ever cut."},
     {id:"keaton",  name:"Buster Keaton",        kind:"Filmmaker", color:"#7BD655", bio:"The Great Stone Face — silent comedy's fearless engineer of the impossible gag."},
     {id:"lang",    name:"Fritz Lang",           kind:"Filmmaker", color:"#FFB23E", bio:"Master of shadow and dread, from German Expressionism to hard American film noir."},
-    {id:"soundhelix", name:"SoundHelix",         kind:"Placeholder audio", color:"#B98CFF", bio:"Royalty-free algorithmic music used here as placeholder audio for BOP FM, credited per SoundHelix's terms. These stand in for Better Off Published's own catalogue, which will live on Bunny with signed URLs."}
+    {id:"soundhelix", name:"SoundHelix",         kind:"Placeholder audio", color:"#B98CFF", bio:"Royalty-free algorithmic music used here as placeholder audio for BOP FM, credited per SoundHelix's terms. These stand in for Better Off Published's own catalogue, which will live on Bunny with signed URLs."},
+    {id:"briceandmat", name:"Brice & Mat", kind:"Comedy", color:"#FFB23E", bio:"Brice and Mat — sketch comedy, sitcom bits, and let's-play antics from the Better Off Published family."},
+    {id:"drh", name:"Dead Royal Highness", kind:"Band", color:"#FF4D8D", bio:"A Better Off Published band. Original music, streaming here for discovery."},
+    {id:"mclay", name:"M. Clay Smith", kind:"Musician", color:"#37D6C4", bio:"Mat's solo act — original songs published through Better Off Published."}
   ],
   series:[
     {id:"s-open", name:"The Open Movie Collection", creatorId:"blender", blurb:"A run of landmark open-source short films, presented as a BOP TV cinema strand."}
@@ -473,6 +496,8 @@ const DATA = {
     {id:"cartoon-cavalcade", name:"Cartoon Cavalcade", seriesId:null, creatorId:"pdt", blurb:"Classic public-domain animation between the features."},
     {id:"two-reelers", name:"Two-Reelers", seriesId:null, creatorId:"pdt", blurb:"Short comedy from the masters — Chaplin, Keaton, the Stooges, the Keystone gang."},
     {id:"bop-fm", name:"BOP FM", seriesId:null, creatorId:"soundhelix", blurb:"BOP TV's nonstop music channel — the song, an animated visualizer, and who made it. A discovery stream that points listeners to where they can buy and stream."},
+    {id:"bm-play", name:"Brice & Mat Play That!", seriesId:null, creatorId:"briceandmat", blurb:"Sketch comedy and sitcom bits from Brice and Mat — the first real BOP TV originals."},
+    {id:"bop-mv", name:"BOP Music Videos", seriesId:null, creatorId:"bop", blurb:"Original music videos from the Better Off Published family of artists."},
     {id:"ad-break",    name:"The Ad Break", seriesId:null, creatorId:"bop", blurb:"Fake commercials, promos, and channel messages. The good part of TV, honestly."},
     {id:"station",     name:"Station Idents", seriesId:null, creatorId:"bop", blurb:"The little BOP TV bumpers that play between programming. Generated live in your browser — logo, color bars, and a jingle."}
   ],
@@ -511,6 +536,13 @@ const DATA = {
     {id:"stooges",  title:"Three Stooges: Disorder in the Court",showId:"two-reelers", creatorId:"pdt", channelId:"one", category:"Shorts", dur:1020, url:ARC+"Disorder_in_the_Court.mp4",           hue:120, desc:"1936. The boys take the witness stand. Peak public-domain Stooges anarchy."},
     {id:"popeye",   title:"Popeye Meets Aladdin",            showId:"cartoon-cavalcade", creatorId:"pdt", channelId:"one", category:"Cartoons", dur:1020, url:ARC+"Popeye_Meets_Aladdin.mp4",        hue:40,  desc:"1939. A two-reel Technicolor special — spinach meets the magic lamp."},
     {id:"betty",    title:"Betty Boop: My Friend the Monkey",showId:"cartoon-cavalcade", creatorId:"pdt", channelId:"one", category:"Cartoons", dur:420,  url:ARC+"Betty_Boop_My_Friend_the_Monkey.mp4",hue:300, desc:"1939. Betty adopts a mischievous monkey and the house pays for it. Fleischer cartoon fun."},
+    /* ---- REAL BOP TV content on Bunny Stream (Library 746502) ---- */
+    {id:"bm-psa1",  title:"A Public Service Announcement", showId:"bm-play", creatorId:"briceandmat", channelId:"one", category:"Comedy", dur:90, url:bhls("a55d522a-6f8b-491e-87cb-078934e38092"), hue:44,  desc:"A public service announcement from The People's Coalition — a Brice & Mat Play That! bit."},
+    {id:"bm-psa2",  title:"Another Public Service Announcement", showId:"bm-play", creatorId:"briceandmat", channelId:"one", category:"Comedy", dur:90, url:bhls("ee6d46f3-92ec-4f33-b3cb-2fee49b55bbc"), hue:12,  desc:"Another public service announcement from The People's Coalition — Brice & Mat Play That!"},
+    {id:"bm-intro", title:"Brice & Mat Play That! — Sitcom Intro", showId:"bm-play", creatorId:"briceandmat", channelId:"one", category:"Comedy", dur:45, url:bhls("9591ed0f-d42d-4997-b2b7-2863795b89a1"), hue:52,  desc:"The sitcom-style opening for Brice & Mat Play That!"},
+    {id:"mv-inner", title:"Inner Mission", showId:"bop-mv", creatorId:"drh", channelId:"one", category:"Music Videos", dur:210, url:bhls("81f240ac-a54e-4b90-b291-5424dc5345b3"), hue:330, desc:"\"Inner Mission\" by Dead Royal Highness (2025) — Better Off Published."},
+    {id:"mv-hylun", title:"How You Like Us Now", showId:"bop-mv", creatorId:"drh", channelId:"one", category:"Music Videos", dur:210, url:bhls("b16557eb-8f22-4fba-8424-a92628b6234a"), hue:355, desc:"\"How You Like Us Now\" by Dead Royal Highness (2025) — Better Off Published."},
+    {id:"mv-shower",title:"Shower Song", showId:"bop-mv", creatorId:"mclay", channelId:"one", category:"Music Videos", dur:200, url:bhls("aca21bdd-6a60-434c-aeea-3b8640fe0991"), hue:175, desc:"\"Shower Song\" by M. Clay Smith (2025) — Better Off Published."},
     /* ---- BOP FM audio tracks (audio-only; our visualizer draws the picture). Real BOP releases go on Bunny Storage w/ signed URLs. ---- */
     {id:"sh1", title:"SoundHelix Song 1", artist:"SoundHelix", album:"Algorithmic Sessions, Vol. 1", year:2019, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:373, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", hue:265, desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
     {id:"sh2", title:"SoundHelix Song 2", artist:"SoundHelix", album:"Algorithmic Sessions, Vol. 1", year:2019, audio:true, showId:"bop-fm", creatorId:"soundhelix", channelId:"bopfm", category:"Music", dur:426, url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", hue:210, desc:"Placeholder demo track standing in for a Better Off Published release. Credit: SoundHelix."},
@@ -529,7 +561,7 @@ const DATA = {
   ],
   /* per-channel repeating daily playlists — resolved against the wall clock */
   playlists:{
-    one:      ["id-power","fbf","deuces","id-star","betty","brb","gulliver","id-bars","stooges","fbb","brunette","bbb","id-star","popeye","brb","africa","id-power","janitor","fbf","shedone","id-bars","mabel","reefer"],
+    one:      ["id-power","bm-intro","mv-shower","fbf","bm-psa1","mv-inner","brb","deuces","id-star","betty","gulliver","id-bars","bm-psa2","mv-hylun","stooges","fbb","brunette","bbb","id-star","popeye","brb","africa","id-power","janitor","fbf","shedone","id-bars","mabel","reefer"],
     vault:    ["id-bars","detour","id-star","oneweek","brb","nosferatu","fbj","hewalked","id-power","steamboat","brb","doa","id-star","scarlet","id-bars","ed"],
     graveyard:["id-power","notld","brb","fbe","carnival","id-bars","teens","id-star","bucket","brb","santa","fbm","sintel","id-power","tos"],
     bopfm:    ["id-bars","sh1","sh2","sh3","sh4","sh5","sh6","sh7","sh8","sh9"]
@@ -547,7 +579,8 @@ const creatorById = {}; DATA.creators.forEach(c=>creatorById[c.id]=c);
 const YEARS = {notld:1968,carnival:1962,bucket:1959,teens:1959,santa:1964,detour:1945,doa:1949,scarlet:1945,
   hewalked:1948,nosferatu:1922,steamboat:1928,reefer:1936,africa:1949,brunette:1947,gulliver:1939,deuces:1939,
   shedone:1933,oneweek:1920,janitor:1914,mabel:1914,stooges:1936,popeye:1939,betty:1939,bbb:2008,sintel:2010,ed:2006,tos:2012,
-  sh1:2019,sh2:2019,sh3:2020,sh4:2020,sh5:2021,sh6:2021,sh7:2022,sh8:2022,sh9:2023};
+  sh1:2019,sh2:2019,sh3:2020,sh4:2020,sh5:2021,sh6:2021,sh7:2022,sh8:2022,sh9:2023,
+  "bm-psa1":2024,"bm-psa2":2024,"bm-intro":2024,"mv-inner":2025,"mv-hylun":2025,"mv-shower":2025};
 const addedOrder = {}; DATA.content.forEach((c,i)=>addedOrder[c.id]=i); // array order ≈ recency
 
 /* ---------- 2. GENERATED ART (logos + posters) ---------- */
@@ -958,7 +991,7 @@ function tickLive(force){
     if(liveState.failT){clearTimeout(liveState.failT);liveState.failT=null;}
     paintNow(); setMediaSession(air.item);
     if(air.item.ident){
-      v.pause();v.style.display="none";v.removeAttribute("src");v.load();
+      detachMedia(v);v.pause();v.style.display="none";v.removeAttribute("src");v.load();
       cv.style.display="block";showSlate(false);
       drawIdent(cv,air.item.ident,performance.now()-air.offset*1000);
       if(air.offset<1.4) jingle(air.item.ident); // only if caught near the top
@@ -967,7 +1000,7 @@ function tickLive(force){
       // music channel — audio plays through the (hidden) media element; canvas draws the visualizer
       cancelAnimationFrame(identRAF);
       v.style.display="none"; cv.style.display="block"; showSlate(false);
-      v.muted=masterMuted; v.src=air.item.url;
+      v.muted=masterMuted; attachMedia(v,air.item.url);
       drawMusic(cv,air.item,performance.now()-air.offset*1000);
       const seekA=()=>{
         try{v.currentTime=Math.min(air.offset,(v.duration||air.item.dur)-0.3)}catch(e){}
@@ -985,7 +1018,7 @@ function tickLive(force){
     } else {
       cancelAnimationFrame(identRAF);
       v.muted=masterMuted; v.style.display="block"; cv.style.display="none";
-      v.src=air.item.url;
+      attachMedia(v,air.item.url);
       const showCard=()=>{cancelAnimationFrame(identRAF);v.style.display="none";cv.style.display="block";
         drawProgram(cv,air.item,performance.now()-air.offset*1000);};
       const showVid=()=>{if(liveState.failT){clearTimeout(liveState.failT);liveState.failT=null;}
@@ -1208,7 +1241,7 @@ function renderWatch(id){
            <p class="audio-disc">Discovery stream — the real release will link out to buy &amp; stream.</p>
          </div>
        </div>`
-    : `<div class="watch-hero"><video controls playsinline preload="metadata" poster="${poster(it)}" src="${it.url}" aria-label="${esc(it.title)}"></video></div>`;
+    : `<div class="watch-hero"><video id="vodVideo" controls playsinline preload="metadata" poster="${poster(it)}" aria-label="${esc(it.title)}"></video></div>`;
   V.innerHTML=`
     <button class="back-btn" onclick="history.back()">${icon("back")} Back</button>
     ${hero}
@@ -1225,6 +1258,7 @@ function renderWatch(id){
     </div>
     ${more.length?`<section class="rail"><h2 class="rail-h">More from ${esc(show.name)}</h2>
       <div class="rail-track">${more.map(tileHTML).join("")}</div></section>`:""}`;
+  if(!it.audio){ const vv=document.getElementById("vodVideo"); if(vv) attachMedia(vv, it.url); }
   V.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>go("/watch/"+b.dataset.id)));
 }
 
@@ -1343,7 +1377,15 @@ function initPlayer(){
   document.getElementById("pipBtn").addEventListener("click",togglePiP);
   document.getElementById("miniClose").addEventListener("click",e=>{e.stopPropagation();liveState.follow=false;hidePlayer();});
   document.getElementById("miniReturn").addEventListener("click",()=>go("/live"));
-  v.addEventListener("ended",()=>{if(liveState.active)tickLive(true);});
+  v.addEventListener("ended",()=>{
+    if(!liveState.active) return;
+    const air=airingAt(liveState.chId,Date.now());
+    if(air.endMs-Date.now()>2000 && !air.item.ident){   // slot still running: show the card until next segment
+      cancelAnimationFrame(identRAF);
+      liveState.video.style.display="none"; liveState.canvas.style.display="block";
+      drawProgram(liveState.canvas,air.item,performance.now()-air.offset*1000);
+    }
+  });
 }
 initPlayer();
 function tickClock(){const c=document.getElementById("clock");if(c)c.textContent=fmtClock(Date.now())}
