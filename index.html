@@ -338,14 +338,26 @@ main{max-width:var(--maxw);margin:0 auto;padding:clamp(16px,3vw,30px) clamp(14px
 .gcn{font-family:"Bricolage Grotesque";font-weight:700;font-size:14px;display:flex;align-items:center;gap:7px}
 .gcn .dot{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
 .gcnum{font-family:"DM Mono",monospace;font-size:10.5px;color:var(--ink-faint)}
-.gcells{position:relative;flex:0 0 auto;white-space:nowrap;font-size:0}
-.gcell2{display:inline-block;vertical-align:top;height:66px;overflow:hidden;border-left:1px solid var(--line);
-  background:none;cursor:pointer;text-align:left;padding:9px 8px;color:inherit}
-.gcell2:hover{background:var(--surface-2)}
-.gcell2.glive{background:rgba(255,178,62,.10)}
+.gcells{position:relative;flex:0 0 auto;height:66px}
+.gcell2{position:absolute;top:0;height:66px;overflow:hidden;border-left:1px solid var(--line);
+  background:#14141c;cursor:pointer;text-align:left;padding:9px 8px;color:inherit}
+.gcell2:hover{background:var(--surface-2);z-index:1}
+.gcell2.glive{background:rgba(255,178,62,.12)}
 .gcell2 .gt{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gcell2 .gs{display:block;font-size:11px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}
 .gliveflag{color:var(--live);font-weight:700}
+/* guide program popup (touch) */
+.gpop-backdrop{position:fixed;inset:0;z-index:120;background:rgba(6,6,10,.6);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;padding:20px;animation:fadein .15s ease}
+.gpop{background:var(--surface);border:1px solid var(--line-strong);border-radius:16px;padding:20px;max-width:340px;width:100%;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.8)}
+.gpop-title{font-family:"Bricolage Grotesque";font-weight:800;font-size:19px;line-height:1.15;margin-bottom:6px}
+.gpop-sub{color:var(--ink-dim);font-size:14px;margin-bottom:16px}
+.gpop-actions{display:flex;flex-direction:column;gap:8px}
+.gpop-btn{appearance:none;cursor:pointer;border-radius:10px;padding:12px;font-size:15px;font-weight:600;
+  border:1px solid var(--line-strong);background:var(--surface-2);color:var(--ink)}
+.gpop-btn.primary{background:var(--amber);color:#1a1206;border-color:var(--amber)}
+.gpop-btn.ghost{background:none;border:none;color:var(--ink-dim);font-weight:500}
 .gnow{position:absolute;top:34px;bottom:0;width:2px;background:var(--amber);z-index:2;
   box-shadow:0 0 8px rgba(255,178,62,.7);pointer-events:none}
 .gnow::before{content:"";position:absolute;top:-1px;left:-4px;width:10px;height:10px;border-radius:50%;background:var(--amber)}
@@ -533,7 +545,7 @@ const DATA = {
     {id:"oneweek",  title:"One Week",                        showId:"two-reelers", creatorId:"keaton",  channelId:"vault", category:"Shorts", dur:1500, url:ARC+"One_Week.mp4",                     hue:50,  desc:"1920. Newlyweds assemble a build-it-yourself house — disastrously. Keaton's first great short."},
     {id:"janitor",  title:"Charlie Chaplin: The New Janitor",showId:"two-reelers", creatorId:"chaplin", channelId:"one", category:"Shorts", dur:780,  url:ARC+"Charlie_Chaplin_The_New_Janitor.mp4",hue:200, desc:"1914. The Tramp mops, bumbles, and foils a robbery. Early Keystone Chaplin."},
     {id:"mabel",    title:"Mabel's Strange Predicament",     showId:"two-reelers", creatorId:"chaplin", channelId:"one", category:"Shorts", dur:1020, url:ARC+"Charlie_Chaplin_Mabels_Strange_Predicament.mp4", hue:20, desc:"1914. Hotel-hallway chaos — and one of the very first appearances of the Tramp costume."},
-    {id:"stooges",  title:"Three Stooges: Disorder in the Court",showId:"two-reelers", creatorId:"pdt", channelId:"one", category:"Shorts", dur:1020, url:ARC+"Disorder_in_the_Court.mp4",           hue:120, desc:"1936. The boys take the witness stand. Peak public-domain Stooges anarchy."},
+    {id:"stooges",  title:"The 39 Steps",showId:"vault-cinema", creatorId:"pdt", channelId:"one", category:"Classics", dur:5100, url:ARC+"The_39_Steps.mp4",           hue:215, desc:"1935. Hitchcock's breathless chase — an innocent man, a murder, and a deadly secret across Britain. A sound-era classic (swapped in for a silent-audio placeholder)."},
     {id:"popeye",   title:"Popeye Meets Aladdin",            showId:"cartoon-cavalcade", creatorId:"pdt", channelId:"one", category:"Cartoons", dur:1020, url:ARC+"Popeye_Meets_Aladdin.mp4",        hue:40,  desc:"1939. A two-reel Technicolor special — spinach meets the magic lamp."},
     {id:"betty",    title:"Betty Boop: My Friend the Monkey",showId:"cartoon-cavalcade", creatorId:"pdt", channelId:"one", category:"Cartoons", dur:420,  url:ARC+"Betty_Boop_My_Friend_the_Monkey.mp4",hue:300, desc:"1939. Betty adopts a mischievous monkey and the house pays for it. Fleischer cartoon fun."},
     /* ---- REAL BOP TV content on Bunny Stream (Library 746502) ---- */
@@ -578,7 +590,7 @@ const creatorById = {}; DATA.creators.forEach(c=>creatorById[c.id]=c);
 /* release years (for On Demand sort by date) */
 const YEARS = {notld:1968,carnival:1962,bucket:1959,teens:1959,santa:1964,detour:1945,doa:1949,scarlet:1945,
   hewalked:1948,nosferatu:1922,steamboat:1928,reefer:1936,africa:1949,brunette:1947,gulliver:1939,deuces:1939,
-  shedone:1933,oneweek:1920,janitor:1914,mabel:1914,stooges:1936,popeye:1939,betty:1939,bbb:2008,sintel:2010,ed:2006,tos:2012,
+  shedone:1933,oneweek:1920,janitor:1914,mabel:1914,stooges:1935,popeye:1939,betty:1939,bbb:2008,sintel:2010,ed:2006,tos:2012,
   sh1:2019,sh2:2019,sh3:2020,sh4:2020,sh5:2021,sh6:2021,sh7:2022,sh8:2022,sh9:2023,
   "bm-psa1":2024,"bm-psa2":2024,"bm-intro":2024,"mv-inner":2025,"mv-hylun":2025,"mv-shower":2025};
 const addedOrder = {}; DATA.content.forEach((c,i)=>addedOrder[c.id]=i); // array order ≈ recency
@@ -710,7 +722,7 @@ function drawIdent(canvas, kind, t0){
       ctx.fillStyle="#101018";ctx.fillRect(0,H*0.72,W,H*0.28);
       ctx.fillStyle="#F4F1E8";ctx.font=`800 ${u*0.08}px 'Bricolage Grotesque',sans-serif`;ctx.textAlign="center";
       ctx.fillText("BOP TV",cx,H*0.9);
-      if(!reduce){const sy=(el*H*0.4)%H;ctx.fillStyle="rgba(255,255,255,.06)";ctx.fillRect(0,sy,W,3)}
+      {const sy=(el*H*(reduce?0.12:0.4))%H;ctx.fillStyle="rgba(255,255,255,.06)";ctx.fillRect(0,sy,W,3)}
     } else if(kind==="power"){
       const open=Math.min(1,el/0.5), glow=Math.max(0,1-Math.abs(el-0.6));
       ctx.save();ctx.translate(cx,cy);
@@ -723,7 +735,7 @@ function drawIdent(canvas, kind, t0){
       }
       ctx.restore();
     } else if(kind==="star"){
-      const bob=reduce?0:Math.sin(el*4)*u*0.03, rot=reduce?0:el*0.8;
+      const bob=Math.sin(el*(reduce?1.2:4))*u*(reduce?0.012:0.03), rot=el*(reduce?0.22:0.8);
       ctx.save();ctx.translate(cx,cy+bob);ctx.rotate(rot);
       ctx.fillStyle="#FFB23E";const R=u*0.16,r=u*0.07,N=5;ctx.beginPath();
       for(let i=0;i<N*2;i++){const rad=i%2?r:R,a=Math.PI/N*i-Math.PI/2;ctx.lineTo(Math.cos(a)*rad,Math.sin(a)*rad)}
@@ -732,13 +744,13 @@ function drawIdent(canvas, kind, t0){
       ctx.fillText("BOP TV",cx,cy+u*0.3);
     } else if(kind==="brb"){
       ctx.fillStyle="#12121a";ctx.fillRect(0,0,W,H);
-      const p=reduce?1:(0.6+0.4*Math.abs(Math.sin(el*1.5)));
+      const p=reduce?(0.8+0.2*Math.abs(Math.sin(el*0.7))):(0.6+0.4*Math.abs(Math.sin(el*1.5)));
       ctx.fillStyle=`rgba(255,178,62,${0.9*p})`;ctx.font=`800 ${u*0.075}px 'Bricolage Grotesque',sans-serif`;ctx.textAlign="center";
       ctx.fillText("We'll be right back",cx,cy);
       ctx.fillStyle="#9B9BAA";ctx.font=`500 ${u*0.03}px 'Instrument Sans',sans-serif`;
       ctx.fillText("BOP TV",cx,cy+u*0.12);
     }
-    if(!reduce) identRAF=requestAnimationFrame(frame);
+    identRAF=requestAnimationFrame(frame);
   }
   identRAF=requestAnimationFrame(frame);
 }
@@ -756,7 +768,7 @@ function drawProgram(canvas,item,t0){
     const g=ctx.createLinearGradient(0,0,W,H);
     g.addColorStop(0,`hsl(${hue} 45% 15%)`);g.addColorStop(1,`hsl(${(hue+40)%360} 45% 7%)`);
     ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    if(!reduce){const x=((el*0.10)%1.3-0.15)*W;const lg=ctx.createLinearGradient(x-u*0.5,0,x+u*0.5,0);
+    {const x=((el*(reduce?0.04:0.10))%1.3-0.15)*W;const lg=ctx.createLinearGradient(x-u*0.5,0,x+u*0.5,0);
       lg.addColorStop(0,"rgba(255,255,255,0)");lg.addColorStop(.5,"rgba(255,255,255,.06)");lg.addColorStop(1,"rgba(255,255,255,0)");
       ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);}
     ctx.fillStyle=ch.color;ctx.beginPath();ctx.arc(W*0.11,H*0.19,u*0.018,0,7);ctx.fill();
@@ -769,14 +781,14 @@ function drawProgram(canvas,item,t0){
     ctx.fillStyle="#F4F1E8";ctx.fillText(title,W*0.11,H*0.55);
     const n=22,bw=(W*0.78)/n,bx=W*0.11,by=H*0.80;
     for(let i=0;i<n;i++){
-      const ph=reduce?0.35:(0.5+0.5*Math.sin(el*4+i*0.5)*Math.sin(el*1.3+i*0.7));
+      const ph=reduce?(0.4+0.14*Math.sin(el*1+i*0.4)):(0.5+0.5*Math.sin(el*4+i*0.5)*Math.sin(el*1.3+i*0.7));
       const bh=Math.max(u*0.008,Math.abs(ph)*u*0.13);
       ctx.fillStyle=`hsl(${(hue+i*7)%360} 68% 60%)`;ctx.globalAlpha=0.9;
       ctx.fillRect(bx+i*bw,by-bh,bw*0.58,bh);ctx.globalAlpha=1;
     }
     ctx.fillStyle="rgba(244,241,232,.45)";ctx.font=`500 ${u*0.025}px 'Instrument Sans',system-ui,sans-serif`;
     ctx.fillText("BOP TV · picture simulated in preview",W*0.11,H*0.93);
-    if(!reduce)identRAF=requestAnimationFrame(frame);
+    identRAF=requestAnimationFrame(frame);
   }
   identRAF=requestAnimationFrame(frame);
 }
@@ -797,8 +809,8 @@ function drawMusic(canvas,item,t0){
     const cx=W*0.5, cy=H*0.40, R=u*0.15, bars=48;
     ctx.save(); ctx.translate(cx,cy);
     for(let i=0;i<bars;i++){
-      const a=(i/bars)*Math.PI*2 - Math.PI/2 + (reduce?0:el*0.2);
-      const amp=reduce?0.4:(0.45+0.55*Math.abs(Math.sin(el*3+i*0.6)*Math.cos(el*1.7+i*0.3)));
+      const a=(i/bars)*Math.PI*2 - Math.PI/2 + (reduce?el*0.05:el*0.2);
+      const amp=reduce?(0.4+0.14*Math.abs(Math.sin(el*0.9+i*0.35))):(0.45+0.55*Math.abs(Math.sin(el*3+i*0.6)*Math.cos(el*1.7+i*0.3)));
       const len=amp*u*0.10;
       ctx.strokeStyle=`hsl(${(hue+i*4)%360} 78% ${55+amp*10}%)`;
       ctx.lineWidth=Math.max(1.5,u*0.006); ctx.lineCap="round";
@@ -812,7 +824,7 @@ function drawMusic(canvas,item,t0){
     // bottom equalizer
     const n=32, bw=(W*0.82)/n, bx=W*0.09, by=H*0.88;
     for(let i=0;i<n;i++){
-      const ph=reduce?0.35:(0.5+0.5*Math.sin(el*4+i*0.5)*Math.sin(el*1.2+i*0.8));
+      const ph=reduce?(0.4+0.14*Math.sin(el*1+i*0.5)):(0.5+0.5*Math.sin(el*4+i*0.5)*Math.sin(el*1.2+i*0.8));
       const bh=Math.max(u*0.006,Math.abs(ph)*u*0.10);
       ctx.fillStyle=`hsl(${(hue+i*6)%360} 70% 60%)`; ctx.globalAlpha=0.82;
       ctx.fillRect(bx+i*bw,by-bh,bw*0.6,bh); ctx.globalAlpha=1;
@@ -829,7 +841,7 @@ function drawMusic(canvas,item,t0){
     ctx.fillText([item.artist,item.album,item.year].filter(Boolean).join("   ·   "), W*0.09, H*0.725);
     ctx.fillStyle="rgba(244,241,232,.45)"; ctx.font=`500 ${u*0.024}px 'Instrument Sans',system-ui,sans-serif`;
     ctx.fillText("BOP TV · audio simulated in preview", W*0.09, H*0.95);
-    if(!reduce) identRAF=requestAnimationFrame(frame);
+    identRAF=requestAnimationFrame(frame);
   }
   identRAF=requestAnimationFrame(frame);
 }
@@ -1098,16 +1110,15 @@ function renderGuide(){
     let cells;
     if(ch.template==="music"){
       const live=isToday;
-      cells = live
-        ? `<button class="gcell2 glive" style="width:${trackW}px" data-go="live:${ch.id}"><span class="gt"><b class="gliveflag">● LIVE</b> ${esc(ch.name)} · Nonstop music</span><span class="gs">${esc(ch.tagline)}</span></button>`
-        : `<div class="gcell2" style="width:${trackW}px"><span class="gt">${esc(ch.name)} · Nonstop music</span><span class="gs">${esc(ch.tagline)}</span></div>`;
+      cells = `<button class="gcell2 ${live?'glive':''}" style="left:0;width:${trackW}px" title="${esc(ch.name+' · Nonstop music')}" data-ch="${ch.id}" data-live="${live?1:''}">
+        <span class="gt">${live?'<b class="gliveflag">● LIVE</b> ':''}${esc(ch.name)} · Nonstop music</span><span class="gs">${esc(ch.tagline)}</span></button>`;
     } else {
       cells=dayAbsSchedule(ch.id,dayStart).map(s=>{
-        const w=Math.max(2,((s.endMs-s.startMs)/60000)*PXMIN);
+        const left=((s.startMs-dayStart)/60000)*PXMIN, w=Math.max(3,((s.endMs-s.startMs)/60000)*PXMIN);
         const live=isToday && s.startMs<=now && now<s.endMs;
         const show=showById[s.item.showId], wide=w>44;
-        const tgt = live ? "live:"+ch.id : (s.item.ident ? "" : "watch:"+s.item.id);
-        return `<button class="gcell2 ${live?'glive':''}" style="width:${w}px" data-go="${tgt}" ${tgt?'':'tabindex="-1" aria-hidden="true"'}>
+        const ttl=`${s.item.title} · ${fmtClock(s.startMs)}${show?" · "+show.name:""}`;
+        return `<button class="gcell2 ${live?'glive':''}" style="left:${left}px;width:${w}px" title="${esc(ttl)}" data-ch="${ch.id}" data-item="${s.item.id}" data-live="${live?1:''}" data-start="${s.startMs}">
           ${wide?`<span class="gt">${live?'<b class="gliveflag">● LIVE</b> ':''}${esc(s.item.title)}</span><span class="gs">${fmtClock(s.startMs)} · ${esc(show?show.name:s.item.category)}</span>`:''}
         </button>`;
       }).join("");
@@ -1129,14 +1140,46 @@ function renderGuide(){
       ${isToday?`<div class="gnow" style="left:${nowLeft}px"></div>`:''}
     </div></div></div>`;
   V.querySelectorAll(".gtab").forEach(b=>b.addEventListener("click",()=>{guideDay=+b.dataset.gday;renderGuide();}));
-  V.querySelectorAll(".gcell2[data-go]").forEach(b=>b.addEventListener("click",()=>{
-    const g=b.dataset.go; if(!g)return;
-    if(g.slice(0,5)==="live:"){ liveState.chId=g.slice(5); go("/live"); }
-    else if(g.slice(0,6)==="watch:"){ go("/watch/"+g.slice(6)); }
+  const canHover=matchMedia("(hover:hover) and (pointer:fine)").matches;
+  V.querySelectorAll(".gcell2").forEach(b=>b.addEventListener("click",()=>{
+    const chId=b.dataset.ch, itemId=b.dataset.item, live=b.dataset.live==="1", start=b.dataset.start?+b.dataset.start:null;
+    const item=itemId?byId[itemId]:null;
+    if(canHover){                                   // desktop: click goes straight there (hover shows the title tooltip)
+      if(live && chId){ liveState.chId=chId; go("/live"); }
+      else if(item && !item.ident){ go("/watch/"+item.id); }
+    } else {                                         // touch: popup so even tiny blocks are discoverable
+      const ch=chanById[chId]||{}, show=item?showById[item.showId]:null;
+      openGuidePopup({
+        title: item?item.title:(ch.name+" · Nonstop music"),
+        sub: (start?fmtClock(start)+" · ":"")+(item?(show?show.name:item.category):"Nonstop music"),
+        live, chId, vid:(item && !item.ident)?item.id:null
+      });
+    }
   }));
   const sc=V.querySelector(".gscroll");
   if(sc) sc.scrollLeft = isToday ? Math.max(0,((now-baseMid)/60000)*PXMIN-40) : 8*60*PXMIN;
 }
+function openGuidePopup(o){
+  closeGuidePopup();
+  const el=document.createElement("div"); el.className="gpop-backdrop"; el.id="gpop";
+  el.innerHTML=`<div class="gpop" role="dialog" aria-modal="true" aria-label="${esc(o.title)}">
+    <div class="gpop-title">${esc(o.title)}</div>
+    <div class="gpop-sub">${esc(o.sub)}</div>
+    <div class="gpop-actions">
+      ${o.live&&o.chId?`<button class="gpop-btn primary" data-act="live">▶ Watch live</button>`:""}
+      ${o.vid?`<button class="gpop-btn" data-act="watch">Open on demand</button>`:""}
+      <button class="gpop-btn ghost" data-act="close">Close</button>
+    </div></div>`;
+  document.body.appendChild(el);
+  el.addEventListener("click",e=>{
+    if(e.target===el){closeGuidePopup();return;}
+    const act=e.target.dataset.act;
+    if(act==="live"){ liveState.chId=o.chId; closeGuidePopup(); go("/live"); }
+    else if(act==="watch"){ closeGuidePopup(); go("/watch/"+o.vid); }
+    else if(act==="close"){ closeGuidePopup(); }
+  });
+}
+function closeGuidePopup(){ const p=document.getElementById("gpop"); if(p)p.remove(); }
 
 /* ---- ON DEMAND ---- */
 let vodFilter="All";
